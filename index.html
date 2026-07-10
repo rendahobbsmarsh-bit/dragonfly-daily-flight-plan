@@ -1,2 +1,279 @@
-# dragonfly-daily-flight-plan
-One day. One mission. One intentional life.
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Dragonfly Daily Flight Plan</title>
+<style>
+:root{
+  --bg:#02080b; --panel:#081319; --panel2:#0d1e26;
+  --teal:#2ee6d6; --gold:#f5b94f; --orange:#ff8a3d;
+  --text:#f4efe6; --muted:#9fb3b8; --line:#1e3a42;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  background:radial-gradient(circle at top,#10262d 0,#02080b 48%,#000 100%);
+  color:var(--text);
+}
+.app{max-width:1180px;margin:0 auto;padding:20px}
+.header{
+  border:1px solid var(--line); border-radius:24px; padding:22px;
+  display:grid; grid-template-columns:1fr auto; gap:16px;
+  background:linear-gradient(135deg,rgba(8,19,25,.95),rgba(2,8,11,.92));
+  box-shadow:0 0 40px rgba(46,230,214,.12);
+}
+.logoRow{display:flex;align-items:center;gap:16px}
+.mark{
+  width:76px;height:76px;border:1px solid var(--teal);border-radius:50%;
+  display:grid;place-items:center;color:var(--teal);
+  box-shadow:0 0 24px rgba(46,230,214,.25);
+  font-size:38px;
+}
+h1{margin:0;color:var(--gold);letter-spacing:.08em;font-weight:500}
+.tag{color:var(--orange);margin-top:4px}
+.timeBox{text-align:right}
+.clock{font-size:34px;color:var(--teal);font-variant-numeric:tabular-nums}
+.date{color:var(--muted)}
+.status{
+  margin:16px 0;display:grid;grid-template-columns:repeat(5,1fr);gap:12px
+}
+.stat,.card{
+  background:rgba(8,19,25,.88);border:1px solid var(--line);
+  border-radius:18px;padding:16px;box-shadow:inset 0 0 18px rgba(255,255,255,.02)
+}
+.label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em}
+.value{font-size:20px;color:var(--teal);margin-top:6px}
+.gold{color:var(--gold)} .orange{color:var(--orange)}
+.grid{display:grid;grid-template-columns:1.35fr .9fr;gap:16px}
+.phase{
+  display:grid;grid-template-columns:1fr 220px;gap:18px;align-items:center
+}
+.phaseName{font-size:42px;color:var(--teal);letter-spacing:.08em}
+.ring{
+  width:210px;height:210px;border-radius:50%;display:grid;place-items:center;
+  background:conic-gradient(var(--gold) var(--pct),rgba(46,230,214,.25) 0,rgba(255,255,255,.05) 100%);
+  position:relative;margin:auto;
+}
+.ring:after{
+  content:"";position:absolute;inset:16px;border-radius:50%;background:#061016;border:1px solid var(--line)
+}
+.ringInner{position:relative;z-index:2;text-align:center}
+.big{font-size:38px;color:var(--gold)}
+.sectionTitle{color:var(--gold);letter-spacing:.08em;text-transform:uppercase;margin:0 0 14px}
+.instruments{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.inst{
+  border:1px solid var(--line);border-radius:16px;padding:14px;background:rgba(13,30,38,.65);
+  cursor:pointer;min-height:104px
+}
+.inst.done{border-color:var(--teal);box-shadow:0 0 18px rgba(46,230,214,.16)}
+.icon{font-size:26px}.instName{margin-top:8px}.mini{color:var(--muted);font-size:13px;margin-top:3px}
+.progress{height:8px;background:#132b32;border-radius:99px;overflow:hidden;margin-top:12px}
+.bar{height:100%;width:0;background:linear-gradient(90deg,var(--teal),var(--gold))}
+.btns{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+button{
+  background:#0d1e26;border:1px solid var(--line);color:var(--text);
+  border-radius:999px;padding:9px 12px;font-weight:600
+}
+button.primary{border-color:var(--gold);color:var(--gold)}
+.timeline{display:grid;gap:10px}
+.event{display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid var(--line);padding-bottom:10px}
+.days{font-size:28px;color:var(--gold);text-align:right}
+.mission{
+  margin-top:16px;text-align:center;padding:28px;font-size:24px;line-height:1.35;
+  color:var(--gold)
+}
+.footer{
+  margin-top:16px;display:grid;grid-template-columns:repeat(4,1fr);gap:12px
+}
+@media(max-width:850px){
+  .header,.grid,.phase{grid-template-columns:1fr}.status,.footer{grid-template-columns:1fr 1fr}
+  .instruments{grid-template-columns:1fr 1fr}.timeBox{text-align:left}
+}
+@media(max-width:520px){.status,.footer,.instruments{grid-template-columns:1fr}.phaseName{font-size:34px}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="header">
+    <div class="logoRow">
+      <div class="mark">🪷</div>
+      <div>
+        <h1>DRAGONFLY<br>DAILY FLIGHT PLAN</h1>
+        <div class="tag">One day. One mission. One intentional life.</div>
+      </div>
+    </div>
+    <div class="timeBox">
+      <div class="clock" id="clock">--:--</div>
+      <div class="date" id="date">Loading...</div>
+      <div class="tag">Aircraft DFP-001</div>
+    </div>
+  </header>
+
+  <section class="status">
+    <div class="stat"><div class="label">Flight Status</div><div class="value">ON COURSE ●</div></div>
+    <div class="stat"><div class="label">Mission</div><div class="value gold" id="missionType">HOME DAY</div></div>
+    <div class="stat"><div class="label">Water</div><div class="value" id="waterText">0 / 128 oz</div></div>
+    <div class="stat"><div class="label">Protein</div><div class="value gold" id="proteinText">0 / 170 g</div></div>
+    <div class="stat"><div class="label">Bedtime</div><div class="value orange">9:30 PM</div></div>
+  </section>
+
+  <main class="grid">
+    <section class="card">
+      <h2 class="sectionTitle">Now: Cockpit Dashboard</h2>
+      <div class="phase">
+        <div>
+          <div class="label">Current Phase</div>
+          <div class="phaseName" id="phaseName">PREFLIGHT</div>
+          <p class="mini" id="phaseWindow">3:00 AM – 6:00 AM</p>
+          <p id="phaseNote">Start gently. Water, devotion, stretch, and orient the day.</p>
+        </div>
+        <div class="ring" id="ring" style="--pct:0%">
+          <div class="ringInner">
+            <div class="label">Daily Systems</div>
+            <div class="big" id="completeCount">0/9</div>
+            <div class="mini">complete</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2 class="sectionTitle">Flight Timeline</h2>
+      <div class="timeline" id="timeline"></div>
+    </section>
+
+    <section class="card">
+      <h2 class="sectionTitle">Daily Instruments</h2>
+      <div class="instruments" id="instruments"></div>
+
+      <div class="card" style="margin-top:14px">
+        <div class="label">Water Log</div>
+        <div class="btns">
+          <button class="primary" onclick="addWater(8)">+8 oz</button>
+          <button onclick="addWater(16)">+16 oz</button>
+          <button onclick="resetWater()">Reset</button>
+        </div>
+        <div class="progress"><div class="bar" id="waterBar"></div></div>
+      </div>
+
+      <div class="card" style="margin-top:14px">
+        <div class="label">Protein Log</div>
+        <div class="btns">
+          <button class="primary" onclick="addProtein(20)">+20 g</button>
+          <button onclick="addProtein(40)">+40 g</button>
+          <button onclick="resetProtein()">Reset</button>
+        </div>
+        <div class="progress"><div class="bar" id="proteinBar"></div></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2 class="sectionTitle">System Check</h2>
+      <p><span class="gold">Today’s Mission:</span><br>Build the life you want to come home to.</p>
+      <p><span class="gold">Turbulence Protocol:</span><br>When the day breaks down, return to the minimum wins: water, stretch, devotion, food, and rest.</p>
+      <p><span class="gold">Private Motto:</span><br>Today, I choose to build the life I want to come home to.</p>
+    </section>
+  </main>
+
+  <section class="card mission">
+    The goal isn’t to do everything.<br>
+    The goal is to move the life I’m building forward today.
+  </section>
+
+  <section class="footer">
+    <div class="stat"><div class="label">Altitude</div><div class="value">LIVING WELL</div></div>
+    <div class="stat"><div class="label">Heading</div><div class="value gold">INTENTIONAL</div></div>
+    <div class="stat"><div class="label">Destination</div><div class="value">A LIFE I LOVE</div></div>
+    <div class="stat"><div class="label">Systems Designer</div><div class="value orange">SAGE</div></div>
+  </section>
+</div>
+
+<script>
+const todayKey = new Date().toISOString().slice(0,10);
+const saved = JSON.parse(localStorage.getItem("dfp-" + todayKey) || "{}");
+let water = saved.water || 0;
+let protein = saved.protein || 0;
+let done = saved.done || {};
+
+const instruments = [
+  ["stretch","🧘","Stretch","Minimum win: 3 minutes"],
+  ["exercise","🏋🏾","Exercise","Minimum win: 10 minutes"],
+  ["photo","📷","Take One Photo","Capture one mood"],
+  ["devotion","🙏","Devotion","Start centered"],
+  ["protein","🥩","Protein Goal","Target: 170 g"],
+  ["read","📖","Read 20 Minutes","A few pages count"],
+  ["sunshine","☀️","Sunshine","10 minutes outside"],
+  ["water","💧","1 Gallon Water","Target: 128 oz"],
+  ["bills","💰","Bills & Due Dates","Quick daily review"]
+];
+
+const events = [
+  ["Vacation","2026-08-01","🌴"],
+  ["Texas AFL-CIO Scholarship Committee Meeting","2026-08-11T09:00:00","🎓"],
+  ["Van to LGA – Pratt Institute – Brooklyn","2026-08-18","🛫"],
+  ["Cadillac Paid Off","2026-09-20","🚗"],
+  ["Tye Shirley Wedding","2026-12-03","💍"]
+];
+
+function save(){localStorage.setItem("dfp-"+todayKey, JSON.stringify({water,protein,done}))}
+
+function updateClock(){
+  const now=new Date();
+  document.getElementById("clock").textContent=now.toLocaleTimeString([], {hour:"numeric",minute:"2-digit"});
+  document.getElementById("date").textContent=now.toLocaleDateString([], {weekday:"long",month:"long",day:"numeric",year:"numeric"});
+  const h=now.getHours()+now.getMinutes()/60;
+  let phase="PREFLIGHT", win="3:00 AM – 6:00 AM", note="Start gently. Water, devotion, stretch, and orient the day.";
+  if(h>=6 && h<10){phase="DEPARTURE";win="6:00 AM – 10:00 AM";note="Launch the day. Handle essentials and protect your energy."}
+  else if(h>=10 && h<14){phase="CRUISE";win="10:00 AM – 2:00 PM";note="Steady progress. One intentional task at a time."}
+  else if(h>=14 && h<18){phase="APPROACH";win="2:00 PM – 6:00 PM";note="Wrap, reset, hydrate, and prepare for evening."}
+  else if(h>=18 && h<21.5){phase="AT THE GATE";win="6:00 PM – 9:30 PM";note="Evening routine. Reflect, restore, and prepare for sleep."}
+  else {phase="LIGHTS OUT";win="9:30 PM – 3:00 AM";note="Rest is part of the mission."}
+  document.getElementById("phaseName").textContent=phase;
+  document.getElementById("phaseWindow").textContent=win;
+  document.getElementById("phaseNote").textContent=note;
+}
+setInterval(updateClock,1000); updateClock();
+
+function renderInstruments(){
+  const el=document.getElementById("instruments"); el.innerHTML="";
+  instruments.forEach(([key,icon,name,mini])=>{
+    const div=document.createElement("div");
+    div.className="inst "+(done[key]?"done":"");
+    div.onclick=()=>{done[key]=!done[key]; save(); renderInstruments();};
+    div.innerHTML=`<div class="icon">${icon}</div><div class="instName">${done[key]?"✅ ":""}${name}</div><div class="mini">${mini}</div>`;
+    el.appendChild(div);
+  });
+  const count=Object.values(done).filter(Boolean).length;
+  document.getElementById("completeCount").textContent=count+"/9";
+  document.getElementById("ring").style.setProperty("--pct",(count/9*100)+"%");
+}
+function renderTimeline(){
+  const el=document.getElementById("timeline"); el.innerHTML="";
+  const now=new Date();
+  events.forEach(([name,date,icon])=>{
+    const target=new Date(date);
+    const days=Math.ceil((target-now)/(1000*60*60*24));
+    const row=document.createElement("div");
+    row.className="event";
+    row.innerHTML=`<div><strong>${icon} ${name}</strong><div class="mini">${target.toLocaleDateString([], {month:"long",day:"numeric",year:"numeric"})}</div></div><div class="days">${days}<div class="mini">days</div></div>`;
+    el.appendChild(row);
+  });
+}
+function updateMeters(){
+  document.getElementById("waterText").textContent=water+" / 128 oz";
+  document.getElementById("proteinText").textContent=protein+" / 170 g";
+  document.getElementById("waterBar").style.width=Math.min(100,water/128*100)+"%";
+  document.getElementById("proteinBar").style.width=Math.min(100,protein/170*100)+"%";
+  done.water = water>=128;
+  done.protein = protein>=170;
+  save(); renderInstruments();
+}
+function addWater(x){water=Math.min(128,water+x);updateMeters()}
+function resetWater(){water=0;updateMeters()}
+function addProtein(x){protein=Math.min(170,protein+x);updateMeters()}
+function resetProtein(){protein=0;updateMeters()}
+renderTimeline(); renderInstruments(); updateMeters();
+</script>
+</body>
+</html>
