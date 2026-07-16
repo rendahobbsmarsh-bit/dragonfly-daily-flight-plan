@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
 <meta name="theme-color" content="#031015" />
-<title>Dragonfly Daily Flight Plan</title>
+<title>Ren OS · Dragonfly Daily Flight Plan</title>
 <style>
 :root{
   --bg:#02070a;--panel:#081319;--panel2:#0c1d24;--line:#1d3a42;
@@ -36,6 +36,18 @@ h1{font-size:clamp(24px,4vw,44px);line-height:1;letter-spacing:.07em;color:var(-
 .layout{display:grid;grid-template-columns:1.25fr .85fr;gap:14px}
 .panel h2{margin:0 0 14px;font-size:15px;text-transform:uppercase;letter-spacing:.12em;color:var(--gold)}
 .focus{display:grid;grid-template-columns:1fr 230px;gap:20px;align-items:center}
+.focusStack{display:grid;gap:12px}
+.focusBlock{padding:15px;border:1px solid var(--line);border-radius:16px;background:rgba(8,19,25,.64)}
+.focusBlock.current{border-color:var(--modeAccent);box-shadow:0 0 20px var(--modeGlow)}
+.focusLabel{font-size:11px;text-transform:uppercase;letter-spacing:.16em;color:var(--muted)}
+.focusTitle{font-size:clamp(22px,3vw,34px);margin-top:6px;color:var(--text)}
+.focusTime{margin-top:5px;color:var(--orange);font-size:13px;letter-spacing:.08em}
+.focusNote{margin-top:7px;color:var(--muted);font-size:13px;line-height:1.45}
+.laterList{display:grid;gap:8px;margin-top:10px}
+.laterItem{display:grid;grid-template-columns:auto 1fr auto;gap:9px;align-items:center;padding:10px 0;border-bottom:1px solid rgba(29,58,66,.7)}
+.laterItem:last-child{border-bottom:0}
+.laterIcon{font-size:19px}.laterName{font-size:15px}.laterTime{font-size:12px;color:var(--gold)}
+
 .greeting{font-size:clamp(28px,4vw,48px);color:var(--teal);margin:4px 0}
 .modeMission{font-size:21px;color:var(--gold);margin:8px 0}
 .phaseLine{color:var(--orange);font-size:13px;letter-spacing:.1em}
@@ -67,7 +79,11 @@ h1{font-size:clamp(24px,4vw,44px);line-height:1;letter-spacing:.07em;color:var(-
 <header class="header glass">
   <div class="brand">
     <div class="emblem">🪷</div>
-    <div><h1>DRAGONFLY<br>DAILY FLIGHT PLAN</h1><div class="tag">One day. One mission. One intentional life.</div></div>
+    <div>
+  <div style="font-size:12px;letter-spacing:.22em;color:var(--teal);margin-bottom:7px">REN OS</div>
+  <h1>DRAGONFLY<br>DAILY FLIGHT PLAN</h1>
+  <div class="tag">One day. One mission. One intentional life.</div>
+</div>
   </div>
   <div><div id="clock" class="clock">--:--</div><div id="date" class="date"></div><div class="aircraft">AIRCRAFT DFP-001 · CAPTAIN REN</div></div>
 </header>
@@ -115,18 +131,22 @@ h1{font-size:clamp(24px,4vw,44px);line-height:1;letter-spacing:.07em;color:var(-
   <section id="dashboard" class="panel glass">
     <h2>Focus Panel</h2>
     <div class="focus">
-      <div>
-        <div class="eyebrow">Current Briefing</div>
-        <div id="greeting" class="greeting">Good Morning, Ren</div>
-        <div id="modeMission" class="modeMission">Build Dragonfly Bliss forward.</div>
-        <div id="phaseLine" class="phaseLine">PREFLIGHT · 3:00 AM – 6:00 AM</div>
-        <div class="eyebrow" style="margin-top:16px">Now</div>
-        <div id="nowTask" class="nowTask">Morning Preflight</div>
-        <div id="nowNote" class="small">Water, devotion, stretch, and orient the day.</div>
-        <div class="nextTask">
-          <div class="eyebrow">Next</div>
-          <strong id="nextTask">Departure</strong>
-          <div id="nextTime" class="small">6:00 AM</div>
+      <div class="focusStack">
+        <div class="focusBlock current">
+          <div class="focusLabel">Current</div>
+          <div id="currentTitle" class="focusTitle">Morning Preflight</div>
+          <div id="currentTime" class="focusTime">3:00 AM – 6:00 AM</div>
+          <div id="currentNote" class="focusNote">Water, devotion, stretch, and orient the day.</div>
+        </div>
+        <div class="focusBlock">
+          <div class="focusLabel">Next</div>
+          <div id="nextTitle" class="focusTitle" style="font-size:23px">Departure</div>
+          <div id="nextFocusTime" class="focusTime">6:00 AM</div>
+          <div id="nextFocusNote" class="focusNote">Breakfast, bills, exercise, or first home priority.</div>
+        </div>
+        <div class="focusBlock">
+          <div class="focusLabel">Later Today</div>
+          <div id="laterList" class="laterList"></div>
         </div>
       </div>
       <div class="ring" id="ring"><div class="ringInner"><div class="eyebrow">Mode Systems</div><div class="ringNum" id="ringNum">0/9</div><div class="small">complete</div></div></div>
@@ -268,13 +288,13 @@ function clock(){
  const timeLabel=start===21.5?'9:30 PM':formatHour(start);
  const endLabel=end===21.5?'9:30 PM':end>24?formatHour(end-24):formatHour(end);
  document.getElementById('phaseTop').textContent=title.toUpperCase();
- document.getElementById('phaseLine').textContent=title.toUpperCase()+' · '+timeLabel+' – '+endLabel;
- document.getElementById('nowTask').textContent=title;
- document.getElementById('nowNote').textContent=note;
- document.getElementById('nextTask').textContent=next[2];
- document.getElementById('nextTime').textContent=next[0]===21.5?'9:30 PM':formatHour(next[0]);
- const greeting=h<12?'Good Morning, Ren':h<18?'Good Afternoon, Ren':h<21.5?'Good Evening, Ren':'Rest Well, Ren';
- document.getElementById('greeting').textContent=greeting;
+ document.getElementById('currentTitle').textContent=title;
+ document.getElementById('currentTime').textContent=timeLabel+' – '+endLabel;
+ document.getElementById('currentNote').textContent=note;
+ document.getElementById('nextTitle').textContent=next[2];
+ document.getElementById('nextFocusTime').textContent=next[0]===21.5?'9:30 PM':formatHour(next[0]);
+ document.getElementById('nextFocusNote').textContent=next[3];
+ renderLater(idx);
  renderSchedule(idx);
 }
 function formatHour(h){
@@ -341,6 +361,18 @@ function updateRing(){
  const total=items.length+(state.mode==='turbulence'?0:2);
  document.getElementById('ringNum').textContent=complete+'/'+total;
  document.getElementById('ring').style.setProperty('--pct',(complete/total*100)+'%');
+}
+function renderLater(currentIdx){
+ const box=document.getElementById('laterList');box.innerHTML='';
+ const schedule=currentSchedule();
+ const icons=state.mode==='flight'?['✈️','🛬','🚌','🏨','🌙','☕']:state.mode==='turbulence'?['💧','🍲','🌿','🛁','📵','🌙']:['🌿','📷','💪','📖','🍽️','🌙'];
+ for(let offset=2;offset<=4;offset++){
+  const item=schedule[(currentIdx+offset)%schedule.length];
+  const d=document.createElement('div');d.className='laterItem';
+  const start=item[0]===21.5?'9:30 PM':formatHour(item[0]);
+  d.innerHTML=`<span class="laterIcon">${icons[(currentIdx+offset)%icons.length]}</span><span class="laterName">${item[2]}</span><span class="laterTime">${start}</span>`;
+  box.appendChild(d);
+ }
 }
 function renderSchedule(currentIdx){
  const box=document.getElementById('scheduleList');box.innerHTML='';
