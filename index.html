@@ -9,13 +9,13 @@
 :root{
   --bg:#02070a;--panel:#081319;--panel2:#0c1d24;--line:#1d3a42;
   --teal:#35e0d0;--gold:#e9b95c;--orange:#f28a45;--text:#f6f1e8;
-  --muted:#9eb2b8;--good:#55d6a8;--danger:#ff8c69;
+  --muted:#9eb2b8;--good:#55d6a8;--danger:#ff8c69;--modeAccent:var(--teal);--modeGlow:rgba(53,224,208,.16);
   --shadow:0 18px 60px rgba(0,0,0,.36)
 }
 *{box-sizing:border-box}
 html,body{margin:0;min-height:100%;background:radial-gradient(circle at 50% -10%,#12303a 0,#041015 35%,#02070a 72%);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
 button,input{font:inherit}
-.app{width:min(1220px,100%);margin:auto;padding:16px 16px 36px}
+.app{width:min(1220px,100%);margin:auto;padding:16px 16px 36px;transition:.3s ease}
 .glass{background:linear-gradient(145deg,rgba(12,29,36,.95),rgba(5,13,17,.95));border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow)}
 .header{padding:20px;display:grid;grid-template-columns:1fr auto;gap:18px;align-items:center}
 .brand{display:flex;gap:14px;align-items:center}
@@ -29,9 +29,9 @@ h1{font-size:clamp(24px,4vw,44px);line-height:1;letter-spacing:.07em;color:var(-
 .value{margin-top:6px;font-size:19px;color:var(--teal)}.gold{color:var(--gold)}.orange{color:var(--orange)}
 .shell{display:grid;grid-template-columns:230px 1fr;gap:14px}
 .sidebar{padding:14px;position:sticky;top:12px;height:max-content}
-.navBtn,.modeBtn{width:100%;display:flex;align-items:center;gap:10px;text-align:left;margin:0 0 8px;padding:12px;border:1px solid var(--line);background:rgba(8,19,25,.72);color:var(--text);border-radius:14px;cursor:pointer}
-.navBtn.active,.modeBtn.active{border-color:var(--teal);color:var(--teal);box-shadow:0 0 18px rgba(53,224,208,.12)}
-.modeBtn.turbulence.active{border-color:var(--orange);color:var(--orange)}
+.modeSwitcher{display:grid;gap:10px}.navBtn,.modeBtn{width:100%;display:flex;align-items:center;gap:10px;text-align:left;margin:0 0 8px;padding:12px;border:1px solid var(--line);background:rgba(8,19,25,.72);color:var(--text);border-radius:14px;cursor:pointer}
+.navBtn.active{border-color:var(--teal);color:var(--teal);box-shadow:0 0 18px rgba(53,224,208,.12)}.modeBtn{position:relative;overflow:hidden}.modeBtn:before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,var(--modeGlow),transparent);opacity:0;transition:.2s}.modeBtn.active{border-color:var(--modeAccent);color:var(--modeAccent);box-shadow:0 0 22px var(--modeGlow)}.modeBtn.active:before{opacity:1}.modeBtn span{position:relative;z-index:1}
+.modeBtn.turbulence.active{border-color:var(--orange);color:var(--orange)}.modeCopy{display:grid;gap:2px}.modeName{font-weight:700}.modeDesc{font-size:11px;color:var(--muted)}.modeBtn.active .modeDesc{color:inherit;opacity:.8}.modeIndicator{margin-left:auto;width:9px;height:9px;border-radius:50%;background:transparent;border:1px solid currentColor}.modeBtn.active .modeIndicator{background:currentColor;box-shadow:0 0 12px currentColor}.modeBanner{margin:0 0 14px;padding:13px 15px;border:1px solid var(--modeAccent);border-radius:16px;background:linear-gradient(90deg,var(--modeGlow),transparent);display:flex;align-items:center;justify-content:space-between;gap:12px}.modeBanner strong{color:var(--modeAccent);letter-spacing:.08em}.modeBanner .small{max-width:620px}
 .navIcon{font-size:20px}.sideLabel{font-size:11px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;margin:16px 4px 9px}
 .layout{display:grid;grid-template-columns:1.25fr .85fr;gap:14px}
 .panel h2{margin:0 0 14px;font-size:15px;text-transform:uppercase;letter-spacing:.12em;color:var(--gold)}
@@ -82,10 +82,24 @@ h1{font-size:clamp(24px,4vw,44px);line-height:1;letter-spacing:.07em;color:var(-
 
 <div class="shell">
 <aside class="sidebar glass">
-  <div class="sideLabel">Operating Mode</div>
-  <button class="modeBtn" data-mode="home"><span class="navIcon">🏡</span><span>Home Mode</span></button>
-  <button class="modeBtn" data-mode="flight"><span class="navIcon">✈️</span><span>Flight Attendant Mode</span></button>
-  <button class="modeBtn turbulence" data-mode="turbulence"><span class="navIcon">🌪</span><span>Turbulence Mode</span></button>
+  <div class="sideLabel">Flight Modes</div>
+  <div class="modeSwitcher" role="radiogroup" aria-label="Flight modes">
+    <button class="modeBtn" data-mode="home" role="radio" aria-checked="false">
+      <span class="navIcon">🏡</span>
+      <span class="modeCopy"><span class="modeName">Home</span><span class="modeDesc">Bliss, wellness, projects</span></span>
+      <span class="modeIndicator"></span>
+    </button>
+    <button class="modeBtn" data-mode="flight" role="radio" aria-checked="false">
+      <span class="navIcon">✈️</span>
+      <span class="modeCopy"><span class="modeName">Flight Attendant</span><span class="modeDesc">Preflight, crew, layover</span></span>
+      <span class="modeIndicator"></span>
+    </button>
+    <button class="modeBtn turbulence" data-mode="turbulence" role="radio" aria-checked="false">
+      <span class="navIcon">🌪</span>
+      <span class="modeCopy"><span class="modeName">Turbulence</span><span class="modeDesc">Stabilize without guilt</span></span>
+      <span class="modeIndicator"></span>
+    </button>
+  </div>
   <div class="sideLabel">Navigation</div>
   <button class="navBtn active" data-target="dashboard"><span class="navIcon">⌂</span><span>Now</span></button>
   <button class="navBtn" data-target="schedulePanel"><span class="navIcon">◷</span><span>Day at a Glance</span></button>
@@ -93,6 +107,10 @@ h1{font-size:clamp(24px,4vw,44px);line-height:1;letter-spacing:.07em;color:var(-
 </aside>
 
 <div>
+<div id="modeBanner" class="modeBanner glass">
+  <div><div class="eyebrow">Active Flight Mode</div><strong id="modeBannerTitle">HOME MODE</strong></div>
+  <div id="modeBannerNote" class="small">Dragonfly Bliss, wellness, photography, and home projects.</div>
+</div>
 <main class="layout">
   <section id="dashboard" class="panel glass">
     <h2>Focus Panel</h2>
@@ -267,8 +285,22 @@ function setMode(mode){
  state.mode=mode;save();renderAll();
 }
 function renderModeButtons(){
- document.querySelectorAll('.modeBtn').forEach(b=>b.classList.toggle('active',b.dataset.mode===state.mode));
- document.getElementById('modeTop').textContent=currentModeLabel()+' MODE';
+ const modeMeta={
+  home:{label:'HOME MODE',note:'Dragonfly Bliss, wellness, photography, and home projects.',accent:'var(--teal)',glow:'rgba(53,224,208,.16)'},
+  flight:{label:'FLIGHT ATTENDANT MODE',note:'Preflight, crew readiness, inflight care, arrival, and layover recovery.',accent:'var(--gold)',glow:'rgba(233,185,92,.17)'},
+  turbulence:{label:'TURBULENCE MODE',note:'The dashboard is simplified. Stabilize first; everything else may wait.',accent:'var(--orange)',glow:'rgba(242,138,69,.18)'}
+ };
+ const meta=modeMeta[state.mode];
+ document.documentElement.style.setProperty('--modeAccent',meta.accent);
+ document.documentElement.style.setProperty('--modeGlow',meta.glow);
+ document.querySelectorAll('.modeBtn').forEach(b=>{
+  const active=b.dataset.mode===state.mode;
+  b.classList.toggle('active',active);
+  b.setAttribute('aria-checked',String(active));
+ });
+ document.getElementById('modeTop').textContent=meta.label;
+ document.getElementById('modeBannerTitle').textContent=meta.label;
+ document.getElementById('modeBannerNote').textContent=meta.note;
  document.getElementById('modeMission').textContent=determineSpecialMission();
  document.getElementById('flightStatus').textContent=state.mode==='turbulence'?'STABILIZING ●':state.mode==='flight'?'CREW READY ●':'ON COURSE ●';
  document.getElementById('homePanel').classList.toggle('hidden',state.mode!=='home');
@@ -344,7 +376,17 @@ function resetWater(){state.water=0;updateMeters()}
 function addProtein(n){state.protein=Math.min(170,state.protein+n);updateMeters()}
 function resetProtein(){state.protein=0;updateMeters()}
 function bindNavigation(){
- document.querySelectorAll('.modeBtn').forEach(b=>b.onclick=()=>setMode(b.dataset.mode));
+ document.querySelectorAll('.modeBtn').forEach(b=>{
+  b.onclick=()=>{setMode(b.dataset.mode);document.getElementById('dashboard').scrollIntoView({behavior:'smooth',block:'start'})};
+  b.onkeydown=e=>{
+    if(e.key==='ArrowDown'||e.key==='ArrowRight'){
+      e.preventDefault();const buttons=[...document.querySelectorAll('.modeBtn')];const i=buttons.indexOf(b);buttons[(i+1)%buttons.length].focus();
+    }
+    if(e.key==='ArrowUp'||e.key==='ArrowLeft'){
+      e.preventDefault();const buttons=[...document.querySelectorAll('.modeBtn')];const i=buttons.indexOf(b);buttons[(i-1+buttons.length)%buttons.length].focus();
+    }
+  };
+});
  document.querySelectorAll('.navBtn').forEach(b=>b.onclick=()=>{
   document.querySelectorAll('.navBtn').forEach(x=>x.classList.remove('active'));b.classList.add('active');
   document.getElementById(b.dataset.target).scrollIntoView({behavior:'smooth',block:'start'});
