@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
 <meta name="theme-color" content="#031015" />
-<title>Ren OS 2.0 · Dispatch Brain</title>
+<title>Ren OS v1.9 · Memory Engine</title>
 <style>
 :root{
   --bg:#02070a;--panel:#081319;--panel2:#0c1d24;--line:#1d3a42;
@@ -135,26 +135,6 @@ h1{font-size:clamp(24px,4vw,44px);line-height:1;letter-spacing:.07em;color:var(-
 .fileInput{display:none}
 @media(max-width:760px){.memoryStats{grid-template-columns:1fr 1fr}.memoryFilters{grid-template-columns:1fr}.memoryItem{grid-template-columns:auto 1fr}.memoryButtons{grid-column:1/-1;justify-content:flex-start}}
 
-
-.dispatchGrid{display:grid;grid-template-columns:1.2fr .8fr;gap:14px}
-.dispatchHero{padding:18px;border:1px solid var(--gold);border-radius:18px;background:linear-gradient(145deg,rgba(233,185,92,.12),rgba(8,19,25,.82))}
-.dispatchRoute{font-size:clamp(34px,6vw,62px);color:var(--gold);letter-spacing:.09em;margin:8px 0}
-.dispatchState{font-size:13px;letter-spacing:.14em;color:var(--teal);text-transform:uppercase}
-.dispatchStats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
-.dispatchStat{padding:12px;border:1px solid var(--line);border-radius:13px;background:rgba(5,13,17,.72)}
-.dispatchValue{font-size:18px;color:var(--teal);margin-top:5px}
-.dispatchAdvice{display:grid;gap:10px}
-.adviceCard{padding:14px;border:1px solid var(--line);border-radius:14px;background:rgba(8,19,25,.68)}
-.adviceCard strong{display:block;color:var(--gold);margin-bottom:5px}
-.dispatchSettings{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:14px}
-.phaseStrip{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin-top:14px}
-.phaseStep{padding:10px 7px;text-align:center;border:1px solid var(--line);border-radius:11px;color:var(--muted);font-size:11px}
-.phaseStep.active{border-color:var(--teal);color:var(--teal);background:rgba(53,224,208,.08);box-shadow:0 0 15px rgba(53,224,208,.12)}
-.brainLog{display:grid;gap:8px;margin-top:12px}
-.brainLogItem{display:grid;grid-template-columns:auto 1fr;gap:9px;padding:10px;border-left:2px solid var(--modeAccent);background:rgba(8,19,25,.5)}
-@media(max-width:900px){.dispatchGrid{grid-template-columns:1fr}.dispatchStats{grid-template-columns:1fr 1fr}.phaseStrip{grid-template-columns:1fr}}
-@media(max-width:560px){.dispatchStats,.dispatchSettings{grid-template-columns:1fr}}
-
 @media(max-width:950px){.shell{grid-template-columns:1fr}.sidebar{position:static}.layout,.focus{grid-template-columns:1fr}.status{grid-template-columns:1fr 1fr}.instruments{grid-template-columns:1fr 1fr}.clock,.date,.aircraft{text-align:left}.header{grid-template-columns:1fr}}
 @media(max-width:560px){.status,.instruments,.checkGrid{grid-template-columns:1fr}.app{padding:10px 10px 28px}.header{padding:16px}.emblem{width:58px;height:58px;font-size:27px}.panel,.tile{padding:14px}}
 </style>
@@ -209,7 +189,6 @@ h1{font-size:clamp(24px,4vw,44px);line-height:1;letter-spacing:.07em;color:var(-
   <button class="navBtn" data-target="managerPanel"><span class="navIcon">＋</span><span>Schedule Manager</span></button>
   <button class="navBtn" data-target="flightOpsPanel"><span class="navIcon">🛫</span><span>Flight Operations</span></button>
   <button class="navBtn" data-target="memoryPanel"><span class="navIcon">🧠</span><span>Memory Engine</span></button>
-  <button class="navBtn" data-target="dispatchPanel"><span class="navIcon">🛰️</span><span>Dispatch Brain</span></button>
 </aside>
 
 <div>
@@ -339,59 +318,6 @@ h1{font-size:clamp(24px,4vw,44px);line-height:1;letter-spacing:.07em;color:var(-
         <div class="opsToolbar">
           <button class="btn primary" onclick="saveTripBriefing()">Save Trip Briefing</button>
           <button class="btn reset" onclick="clearTripBriefing()">Clear</button>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section id="dispatchPanel" class="panel glass" style="margin-top:14px">
-    <h2>Dispatch Brain</h2>
-    <div class="managerNotice">Ren OS now interprets your next flight, calculates your departure window, selects the operating mode, and builds a live briefing.</div>
-
-    <div class="dispatchGrid">
-      <div class="dispatchHero">
-        <div id="dispatchState" class="dispatchState">Awaiting assignment</div>
-        <div id="dispatchRoute" class="dispatchRoute">DAL → —</div>
-        <div id="dispatchTitle" class="modeMission">Add a flight Mission Object to activate Dispatch.</div>
-
-        <div class="dispatchStats">
-          <div class="dispatchStat"><div class="eyebrow">Report</div><div id="dispatchReport" class="dispatchValue">—</div></div>
-          <div class="dispatchStat"><div class="eyebrow">Leave Home</div><div id="dispatchLeave" class="dispatchValue">—</div></div>
-          <div class="dispatchStat"><div class="eyebrow">Countdown</div><div id="dispatchCountdown" class="dispatchValue">—</div></div>
-          <div class="dispatchStat"><div class="eyebrow">Readiness</div><div id="dispatchReady" class="dispatchValue">0%</div></div>
-          <div class="dispatchStat"><div class="eyebrow">Water Before Report</div><div id="dispatchWater" class="dispatchValue">64 oz</div></div>
-          <div class="dispatchStat"><div class="eyebrow">Protein Before Report</div><div id="dispatchProtein" class="dispatchValue">30 g</div></div>
-        </div>
-
-        <div class="phaseStrip">
-          <div class="phaseStep" data-dispatch-phase="planning">Planning</div>
-          <div class="phaseStep" data-dispatch-phase="preflight">Preflight</div>
-          <div class="phaseStep" data-dispatch-phase="departure">Departure</div>
-          <div class="phaseStep" data-dispatch-phase="duty">Duty</div>
-          <div class="phaseStep" data-dispatch-phase="recovery">Recovery</div>
-        </div>
-      </div>
-
-      <div class="dispatchAdvice">
-        <div class="adviceCard">
-          <strong>Recommended Action</strong>
-          <div id="dispatchAction" class="small">Enter your next trip in Flight Operations or the Schedule Manager.</div>
-        </div>
-        <div class="adviceCard">
-          <strong>Operational Settings</strong>
-          <div class="dispatchSettings">
-            <div class="field"><label for="driveMinutes">Drive to Airport</label><input id="driveMinutes" type="number" min="0" value="30"></div>
-            <div class="field"><label for="airportBuffer">Airport Buffer</label><input id="airportBuffer" type="number" min="0" value="45"></div>
-            <div class="field"><label for="prepMinutes">Home Prep Buffer</label><input id="prepMinutes" type="number" min="0" value="30"></div>
-            <div class="field"><label for="recoveryHours">Recovery Window</label><input id="recoveryHours" type="number" min="1" value="12"></div>
-          </div>
-          <div class="opsToolbar">
-            <button class="btn primary" onclick="saveDispatchSettings()">Save Dispatch Settings</button>
-          </div>
-        </div>
-        <div class="adviceCard">
-          <strong>Brain Log</strong>
-          <div id="brainLog" class="brainLog"></div>
         </div>
       </div>
     </div>
@@ -537,10 +463,6 @@ const typeMeta={
  milestone:{icon:'🏁',label:'Milestone'}
 };
 let editingItemId=null;
-const dispatchKey='ren-os-dispatch-settings';
-let dispatchSettings={driveMinutes:30,airportBuffer:45,prepMinutes:30,recoveryHours:12};
-try{dispatchSettings={...dispatchSettings,...JSON.parse(localStorage.getItem(dispatchKey)||'{}')}}catch(e){}
-
 const repeatLabels={none:'Does not repeat',weekly:'Weekly',biweekly:'Every 2 weeks',monthly:'Monthly',yearly:'Yearly'};
 function nextOccurrence(item,from=new Date()){
  const original=safeDate(item.date);
@@ -612,96 +534,6 @@ function determineSpecialMission(){
  return state.mode==='flight'?'WORK TRIP':state.mode==='turbulence'?'STABILIZE':'BUILD THE LIFE YOU WANT TO COME HOME TO';
 }
 
-
-function nextFlightObject(){
- const now=new Date();
- const flights=allEvents().filter(e=>e.type==='flight'&&(e.effectiveDate||safeDate(e.date))>=new Date(now.getTime()-12*3600000));
- return flights[0]||null;
-}
-function dispatchReportDate(){
- const flight=nextFlightObject();
- if(currentTrip.reportDate)return safeDate(currentTrip.reportDate);
- return flight?(flight.effectiveDate||safeDate(flight.date)):null;
-}
-function dispatchLeaveDate(){
- const report=dispatchReportDate();if(!report)return null;
- const total=(Number(dispatchSettings.driveMinutes)||0)+(Number(dispatchSettings.airportBuffer)||0);
- return new Date(report.getTime()-total*60000);
-}
-function dispatchPrepDate(){
- const leave=dispatchLeaveDate();if(!leave)return null;
- return new Date(leave.getTime()-(Number(dispatchSettings.prepMinutes)||0)*60000);
-}
-function dispatchPhase(){
- const report=dispatchReportDate();if(!report)return 'planning';
- const now=new Date(),leave=dispatchLeaveDate(),prep=dispatchPrepDate();
- const recoveryMs=(Number(dispatchSettings.recoveryHours)||12)*3600000;
- if(now<prep)return 'planning';
- if(now<leave)return 'preflight';
- if(now<report)return 'departure';
- if(now<new Date(report.getTime()+8*3600000))return 'duty';
- if(now<new Date(report.getTime()+8*3600000+recoveryMs))return 'recovery';
- return 'planning';
-}
-function saveDispatchSettings(){
- dispatchSettings={
-  driveMinutes:Number(document.getElementById('driveMinutes').value)||0,
-  airportBuffer:Number(document.getElementById('airportBuffer').value)||0,
-  prepMinutes:Number(document.getElementById('prepMinutes').value)||0,
-  recoveryHours:Number(document.getElementById('recoveryHours').value)||12
- };
- localStorage.setItem(dispatchKey,JSON.stringify(dispatchSettings));
- renderDispatchBrain();renderMissionControl();
-}
-function loadDispatchSettings(){
- Object.entries(dispatchSettings).forEach(([key,value])=>{const el=document.getElementById(key);if(el)el.value=value});
-}
-function dispatchActionText(phase){
- const pct=readinessPercent();
- if(!dispatchReportDate())return 'Enter your next trip in Flight Operations or the Schedule Manager.';
- if(phase==='planning')return pct<50?'Begin crew preparation: pack, hydrate, eat protein, and review the trip briefing.':'Protect your margin and verify report, route, gate, and transportation.';
- if(phase==='preflight')return 'Complete the preflight checklist. Finish water and protein targets before leaving home.';
- if(phase==='departure')return 'Departure window is active. Leave for the airport and preserve your report buffer.';
- if(phase==='duty')return 'Duty mode is active. Follow the operational sequence and update only what matters now.';
- return 'Recovery window is active. Hydrate, eat, stretch, shower, and protect sleep.';
-}
-function renderDispatchBrain(){
- const flight=nextFlightObject(),report=dispatchReportDate(),leave=dispatchLeaveDate();
- const phase=dispatchPhase();
- const origin=currentTrip.origin||'DAL';
- const destination=currentTrip.destination||(flight?.details?.includes('→')?flight.details.split('→')[1].trim():'—');
- document.getElementById('dispatchRoute').textContent=origin+' → '+destination;
- document.getElementById('dispatchTitle').textContent=currentTrip.title||flight?.title||'Add a flight Mission Object to activate Dispatch.';
- document.getElementById('dispatchState').textContent=phase.toUpperCase()+' PHASE';
- document.getElementById('dispatchReport').textContent=report?report.toLocaleString([], {month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}):'—';
- document.getElementById('dispatchLeave').textContent=leave?leave.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'}):'—';
- document.getElementById('dispatchCountdown').textContent=report?humanCountdown(report):'—';
- document.getElementById('dispatchReady').textContent=readinessPercent()+'%';
- document.getElementById('dispatchWater').textContent=Math.max(0,64-state.water)+' oz remaining';
- document.getElementById('dispatchProtein').textContent=Math.max(0,30-state.protein)+' g remaining';
- document.getElementById('dispatchAction').textContent=dispatchActionText(phase);
- document.querySelectorAll('[data-dispatch-phase]').forEach(el=>el.classList.toggle('active',el.dataset.dispatchPhase===phase));
-
- const log=document.getElementById('brainLog');log.innerHTML='';
- const entries=[];
- if(report)entries.push(['✈️','Report recognized for '+report.toLocaleString()]);
- if(leave)entries.push(['🚗','Leave-home time calculated for '+leave.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})]);
- entries.push(['◎','Operating mode: '+currentModeLabel()]);
- entries.push(['◔','Readiness calculated at '+readinessPercent()+'%']);
- entries.slice(0,4).forEach(([icon,text])=>{
-  const d=document.createElement('div');d.className='brainLogItem';d.innerHTML=`<span>${icon}</span><span>${text}</span>`;log.appendChild(d);
- });
-}
-function applyDispatchMode(){
- const phase=dispatchPhase(),report=dispatchReportDate();
- if(!report||state.mode==='turbulence')return;
- const now=new Date();
- const hours=(report-now)/3600000;
- if(hours<=24&&hours>-12)state.mode='flight';
- if(phase==='recovery'&&hours<-8)state.mode='home';
- save();
-}
-
 function nextUpcomingEvent(){
  const now=new Date();
  return allEvents().find(e=>(e.effectiveDate||safeDate(e.date))>=now)||null;
@@ -731,7 +563,6 @@ function readinessPercent(){
  return total?Math.round(complete/total*100):0;
 }
 function autoSelectMode(){
- applyDispatchMode();
  const next=nextUpcomingEvent();
  if(!next)return;
  const mins=minutesUntil(next.date);
@@ -822,7 +653,6 @@ function clock(){
  renderLater(idx);
  renderSchedule(idx);
  renderTripBriefing();
- renderDispatchBrain();
  renderMissionControl();
 }
 function formatHour(h){
@@ -947,13 +777,12 @@ function addScheduleItem(){
  if(type==='flight'&&!currentTrip.reportDate){
   currentTrip={...currentTrip,title,reportDate:date,notes:details};
   localStorage.setItem(tripKey,JSON.stringify(currentTrip));
-   localStorage.setItem(dispatchKey,JSON.stringify(dispatchSettings));
   loadTripForm();renderTripBriefing();
  }
  editingItemId=null;
  autoSelectMode();
  clearScheduleForm();
- renderTimeline();renderSavedItems();renderMemoryEngine();renderModeButtons();renderDispatchBrain();renderMissionControl();clock();
+ renderTimeline();renderSavedItems();renderMemoryEngine();renderModeButtons();renderMissionControl();clock();
 }
 function clearScheduleForm(){
  editingItemId=null;
@@ -1034,7 +863,7 @@ function renderMemoryEngine(){
 function exportRenOS(){
  const payload={
   app:'Ren OS',version:'1.9',exportedAt:new Date().toISOString(),
-  schedule:customEvents,trip:currentTrip,dayState:state,dispatchSettings
+  schedule:customEvents,trip:currentTrip,dayState:state
  };
  const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
  const url=URL.createObjectURL(blob);
@@ -1049,7 +878,6 @@ function importRenOS(event){
    const data=JSON.parse(reader.result);
    if(Array.isArray(data.schedule))customEvents=data.schedule;
    if(data.trip)currentTrip=data.trip;
-   if(data.dispatchSettings)dispatchSettings={...dispatchSettings,...data.dispatchSettings};
    localStorage.setItem(scheduleKey,JSON.stringify(customEvents));
    localStorage.setItem(tripKey,JSON.stringify(currentTrip));
    event.target.value='';
@@ -1094,7 +922,7 @@ function renderAll(){
  renderModeButtons();renderHome();
  renderChecklist('flightChecklist',flightItems,'flight','flightClearance');
  renderChecklist('turbulenceChecklist',turbulenceItems,'turbulence','turbulenceClearance');
- renderTimeline();renderSavedItems();renderMemoryEngine();loadTripForm();loadDispatchSettings();renderTripBriefing();renderDispatchBrain();updateMeters();clock();renderMissionControl();
+ renderTimeline();renderSavedItems();renderMemoryEngine();loadTripForm();renderTripBriefing();updateMeters();clock();renderMissionControl();
 }
 bindNavigation();renderAll();setInterval(clock,1000);
 </script>
