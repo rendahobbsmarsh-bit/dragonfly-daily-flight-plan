@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
 <meta name="theme-color" content="#031015" />
-<title>Ren OS 2.1 · Operations Brain</title>
+<title>Ren OS 3.0 · Copilot</title>
 <style>
 :root{
   --bg:#02070a;--panel:#081319;--panel2:#0c1d24;--line:#1d3a42;
@@ -168,6 +168,20 @@ h1{font-size:clamp(24px,4vw,44px);line-height:1;letter-spacing:.07em;color:var(-
 @media(max-width:850px){.opsBrainGrid{grid-template-columns:1fr 1fr}}
 @media(max-width:520px){.opsBrainGrid{grid-template-columns:1fr}}
 
+
+.copilotHero{padding:20px;border:1px solid var(--teal);border-radius:20px;background:linear-gradient(145deg,rgba(53,224,208,.10),rgba(8,19,25,.88));margin-bottom:14px}
+.copilotGreeting{font-size:clamp(30px,5vw,54px);color:var(--teal);margin:8px 0}
+.copilotSummary{font-size:16px;line-height:1.6;color:var(--text);max-width:900px}
+.copilotGrid{display:grid;grid-template-columns:1.2fr .8fr;gap:14px}
+.copilotCard{padding:16px;border:1px solid var(--line);border-radius:16px;background:rgba(8,19,25,.68)}
+.copilotPriority{font-size:24px;color:var(--gold);margin:7px 0}
+.copilotList{display:grid;gap:9px;margin-top:10px}
+.copilotItem{display:grid;grid-template-columns:auto 1fr auto;gap:9px;align-items:center;padding:11px;border:1px solid var(--line);border-radius:12px}
+.scoreRing{width:150px;height:150px;border-radius:50%;display:grid;place-items:center;margin:auto;background:conic-gradient(var(--teal) calc(var(--score)*1%),rgba(29,58,66,.5) 0)}
+.scoreInner{width:118px;height:118px;border-radius:50%;display:grid;place-items:center;background:#07151b;text-align:center}
+.scoreNumber{font-size:34px;color:var(--gold)}
+@media(max-width:900px){.copilotGrid{grid-template-columns:1fr}}
+
 @media(max-width:950px){.shell{grid-template-columns:1fr}.sidebar{position:static}.layout,.focus{grid-template-columns:1fr}.status{grid-template-columns:1fr 1fr}.instruments{grid-template-columns:1fr 1fr}.clock,.date,.aircraft{text-align:left}.header{grid-template-columns:1fr}}
 @media(max-width:560px){.status,.instruments,.checkGrid{grid-template-columns:1fr}.app{padding:10px 10px 28px}.header{padding:16px}.emblem{width:58px;height:58px;font-size:27px}.panel,.tile{padding:14px}}
 </style>
@@ -224,6 +238,7 @@ h1{font-size:clamp(24px,4vw,44px);line-height:1;letter-spacing:.07em;color:var(-
   <button class="navBtn" data-target="memoryPanel"><span class="navIcon">🧠</span><span>Memory Engine</span></button>
   <button class="navBtn" data-target="dispatchPanel"><span class="navIcon">🛰️</span><span>Dispatch Brain</span></button>
   <button class="navBtn" data-target="operationsBrainPanel"><span class="navIcon">⚙️</span><span>Operations Brain</span></button>
+  <button class="navBtn" data-target="copilotPanel"><span class="navIcon">🪷</span><span>Ren Copilot</span></button>
 </aside>
 
 <div>
@@ -354,6 +369,37 @@ h1{font-size:clamp(24px,4vw,44px);line-height:1;letter-spacing:.07em;color:var(-
           <button class="btn primary" onclick="saveTripBriefing()">Save Trip Briefing</button>
           <button class="btn reset" onclick="clearTripBriefing()">Clear</button>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="copilotPanel" class="panel glass" style="margin-top:14px">
+    <h2>Ren Copilot</h2>
+    <div class="copilotHero">
+      <div class="syncBadge">● COPILOT ONLINE</div>
+      <div id="copilotGreeting" class="copilotGreeting">Good morning, Ren.</div>
+      <div id="copilotSummary" class="copilotSummary">Ren OS is preparing your briefing.</div>
+    </div>
+
+    <div class="copilotGrid">
+      <div class="copilotCard">
+        <div class="eyebrow">Primary Mission</div>
+        <div id="copilotPriority" class="copilotPriority">Protect today’s margin.</div>
+        <div id="copilotReason" class="small">The Copilot is evaluating your current mode, next event, and readiness.</div>
+
+        <div class="eyebrow" style="margin-top:18px">Recommended Sequence</div>
+        <div id="copilotSequence" class="copilotList"></div>
+      </div>
+
+      <div class="copilotCard">
+        <div class="eyebrow" style="text-align:center">Mission Score</div>
+        <div id="copilotScoreRing" class="scoreRing" style="--score:0">
+          <div class="scoreInner">
+            <div><div id="copilotScore" class="scoreNumber">0%</div><div class="small">ready</div></div>
+          </div>
+        </div>
+        <div class="eyebrow" style="margin-top:18px">Copilot Note</div>
+        <div id="copilotNote" class="small" style="margin-top:8px;line-height:1.55">Start with the next right thing.</div>
       </div>
     </div>
   </section>
@@ -695,7 +741,7 @@ function saveDispatchSettings(){
   recoveryHours:Number(document.getElementById('recoveryHours').value)||12
  };
  localStorage.setItem(dispatchKey,JSON.stringify(dispatchSettings));
- renderDispatchBrain();renderOperationsBrain();renderMissionControl();
+ renderDispatchBrain();renderOperationsBrain();renderCopilot();renderMissionControl();
 }
 function loadDispatchSettings(){
  Object.entries(dispatchSettings).forEach(([key,value])=>{const el=document.getElementById(key);if(el)el.value=value});
@@ -708,6 +754,65 @@ function dispatchActionText(phase){
  if(phase==='departure')return 'Departure window is active. Leave for the airport and preserve your report buffer.';
  if(phase==='duty')return 'Duty mode is active. Follow the operational sequence and update only what matters now.';
  return 'Recovery window is active. Hydrate, eat, stretch, shower, and protect sleep.';
+}
+
+
+function copilotGreeting(){
+ const h=new Date().getHours();
+ return h<12?'Good morning, Ren.':h<18?'Good afternoon, Ren.':'Good evening, Ren.';
+}
+function copilotPrimaryMission(){
+ const flight=nextFlightObject(),next=nextUpcomingEvent(),finance=financialAlerts();
+ if(state.mode==='turbulence')return {title:'Stabilize without guilt.',reason:'Capacity protection is the mission. Essentials only.'};
+ if(flight&&minutesUntil(flight.effectiveDate||flight.date)<=24*60)return {title:'Prepare for '+(currentTrip.destination||'departure')+'.',reason:'Your next flight is inside the 24-hour operational window.'};
+ if(finance.some(e=>e.type==='bill'))return {title:'Clear the nearest financial obligation.',reason:'A bill is inside the seven-day attention window.'};
+ if(next)return {title:'Move '+next.title+' forward.',reason:'It is the next scheduled Mission Object.'};
+ return {title:'Choose one meaningful priority.',reason:'The runway is clear enough to create intentional momentum.'};
+}
+function copilotSequence(){
+ const sequence=[];
+ if(state.mode==='turbulence'){
+  sequence.push(['💧','Drink water','now'],['🍲','Eat','next'],['🌿','Five minutes outside','later']);
+  return sequence;
+ }
+ const flight=nextFlightObject();
+ if(flight&&minutesUntil(flight.effectiveDate||flight.date)<=24*60){
+  if(state.water<64)sequence.push(['💧','Reach 64 oz before report',Math.max(0,64-state.water)+' oz']);
+  if(state.protein<30)sequence.push(['🍳','Reach 30 g protein before report',Math.max(0,30-state.protein)+' g']);
+  if(!tripChecklistReady())sequence.push(['☐','Complete preflight checklist','']);
+  sequence.push(['🚗','Protect leave-home time',dispatchLeaveDate()?dispatchLeaveDate().toLocaleTimeString([], {hour:'numeric',minute:'2-digit'}):'']);
+  return sequence;
+ }
+ const alerts=operationsAlerts();
+ alerts.slice(0,4).forEach(a=>sequence.push([a.level==='urgent'?'!':'→',a.title,a.note]));
+ return sequence;
+}
+function renderCopilot(){
+ const mission=copilotPrimaryMission(),score=readinessPercent(),next=nextUpcomingEvent();
+ document.getElementById('copilotGreeting').textContent=copilotGreeting();
+ document.getElementById('copilotPriority').textContent=mission.title;
+ document.getElementById('copilotReason').textContent=mission.reason;
+ document.getElementById('copilotScore').textContent=score+'%';
+ document.getElementById('copilotScoreRing').style.setProperty('--score',score);
+
+ let summary='Your operating picture is stable.';
+ if(state.mode==='turbulence')summary='Turbulence Mode is active. Ren OS has reduced the mission to hydration, nourishment, basic care, and recovery.';
+ else if(next)summary='Your next Mission Object is '+next.title+' in '+humanCountdown(next.effectiveDate||next.date)+'. Current readiness is '+score+'%.';
+ document.getElementById('copilotSummary').textContent=summary;
+
+ const seq=document.getElementById('copilotSequence');seq.innerHTML='';
+ copilotSequence().slice(0,5).forEach(([icon,title,time])=>{
+  const d=document.createElement('div');d.className='copilotItem';
+  d.innerHTML=`<span>${icon}</span><span>${title}</span><span class="actionTime">${time}</span>`;
+  seq.appendChild(d);
+ });
+ if(!seq.children.length)seq.innerHTML='<div class="emptyState">No immediate sequence required.</div>';
+
+ let note='Start with the next right thing.';
+ if(score>=80)note='You are well positioned. Protect your margin rather than adding more.';
+ else if(score>=50)note='The mission is viable. Complete one readiness gap before expanding.';
+ else note='Reduce complexity. Water, protein, and the active checklist will create lift.';
+ document.getElementById('copilotNote').textContent=note;
 }
 
 function financialAlerts(){
@@ -915,6 +1020,7 @@ function clock(){
  renderTripBriefing();
  renderDispatchBrain();
  renderOperationsBrain();
+ renderCopilot();
  renderMissionControl();
 }
 function formatHour(h){
@@ -1045,7 +1151,7 @@ function addScheduleItem(){
  editingItemId=null;
  autoSelectMode();
  clearScheduleForm();
- renderTimeline();renderSavedItems();renderMemoryEngine();renderModeButtons();renderDispatchBrain();renderOperationsBrain();renderMissionControl();clock();
+ renderTimeline();renderSavedItems();renderMemoryEngine();renderModeButtons();renderDispatchBrain();renderOperationsBrain();renderCopilot();renderMissionControl();clock();
 }
 function clearScheduleForm(){
  editingItemId=null;
@@ -1186,7 +1292,7 @@ function renderAll(){
  renderModeButtons();renderHome();
  renderChecklist('flightChecklist',flightItems,'flight','flightClearance');
  renderChecklist('turbulenceChecklist',turbulenceItems,'turbulence','turbulenceClearance');
- renderTimeline();renderSavedItems();renderMemoryEngine();loadTripForm();loadDispatchSettings();renderTripBriefing();renderDispatchBrain();renderOperationsBrain();updateMeters();clock();renderMissionControl();
+ renderTimeline();renderSavedItems();renderMemoryEngine();loadTripForm();loadDispatchSettings();renderTripBriefing();renderDispatchBrain();renderOperationsBrain();renderCopilot();updateMeters();clock();renderMissionControl();
 }
 bindNavigation();renderAll();setInterval(clock,1000);
 </script>
