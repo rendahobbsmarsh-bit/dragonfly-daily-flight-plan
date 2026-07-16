@@ -1,279 +1,362 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<meta name="theme-color" content="#031015" />
 <title>Dragonfly Daily Flight Plan</title>
 <style>
 :root{
-  --bg:#02080b; --panel:#081319; --panel2:#0d1e26;
-  --teal:#2ee6d6; --gold:#f5b94f; --orange:#ff8a3d;
-  --text:#f4efe6; --muted:#9fb3b8; --line:#1e3a42;
+  --bg:#02070a;--panel:#081319;--panel2:#0c1d24;--line:#1d3a42;
+  --teal:#35e0d0;--gold:#e9b95c;--orange:#f28a45;--text:#f6f1e8;
+  --muted:#9eb2b8;--good:#55d6a8;--danger:#ff8c69;
+  --shadow:0 18px 60px rgba(0,0,0,.36)
 }
 *{box-sizing:border-box}
-body{
-  margin:0; font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-  background:radial-gradient(circle at top,#10262d 0,#02080b 48%,#000 100%);
-  color:var(--text);
-}
-.app{max-width:1180px;margin:0 auto;padding:20px}
-.header{
-  border:1px solid var(--line); border-radius:24px; padding:22px;
-  display:grid; grid-template-columns:1fr auto; gap:16px;
-  background:linear-gradient(135deg,rgba(8,19,25,.95),rgba(2,8,11,.92));
-  box-shadow:0 0 40px rgba(46,230,214,.12);
-}
-.logoRow{display:flex;align-items:center;gap:16px}
-.mark{
-  width:76px;height:76px;border:1px solid var(--teal);border-radius:50%;
-  display:grid;place-items:center;color:var(--teal);
-  box-shadow:0 0 24px rgba(46,230,214,.25);
-  font-size:38px;
-}
-h1{margin:0;color:var(--gold);letter-spacing:.08em;font-weight:500}
-.tag{color:var(--orange);margin-top:4px}
-.timeBox{text-align:right}
-.clock{font-size:34px;color:var(--teal);font-variant-numeric:tabular-nums}
-.date{color:var(--muted)}
-.status{
-  margin:16px 0;display:grid;grid-template-columns:repeat(5,1fr);gap:12px
-}
-.stat,.card{
-  background:rgba(8,19,25,.88);border:1px solid var(--line);
-  border-radius:18px;padding:16px;box-shadow:inset 0 0 18px rgba(255,255,255,.02)
-}
-.label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em}
-.value{font-size:20px;color:var(--teal);margin-top:6px}
-.gold{color:var(--gold)} .orange{color:var(--orange)}
-.grid{display:grid;grid-template-columns:1.35fr .9fr;gap:16px}
-.phase{
-  display:grid;grid-template-columns:1fr 220px;gap:18px;align-items:center
-}
-.phaseName{font-size:42px;color:var(--teal);letter-spacing:.08em}
-.ring{
-  width:210px;height:210px;border-radius:50%;display:grid;place-items:center;
-  background:conic-gradient(var(--gold) var(--pct),rgba(46,230,214,.25) 0,rgba(255,255,255,.05) 100%);
-  position:relative;margin:auto;
-}
-.ring:after{
-  content:"";position:absolute;inset:16px;border-radius:50%;background:#061016;border:1px solid var(--line)
-}
-.ringInner{position:relative;z-index:2;text-align:center}
-.big{font-size:38px;color:var(--gold)}
-.sectionTitle{color:var(--gold);letter-spacing:.08em;text-transform:uppercase;margin:0 0 14px}
-.instruments{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-.inst{
-  border:1px solid var(--line);border-radius:16px;padding:14px;background:rgba(13,30,38,.65);
-  cursor:pointer;min-height:104px
-}
-.inst.done{border-color:var(--teal);box-shadow:0 0 18px rgba(46,230,214,.16)}
-.icon{font-size:26px}.instName{margin-top:8px}.mini{color:var(--muted);font-size:13px;margin-top:3px}
-.progress{height:8px;background:#132b32;border-radius:99px;overflow:hidden;margin-top:12px}
-.bar{height:100%;width:0;background:linear-gradient(90deg,var(--teal),var(--gold))}
-.btns{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
-button{
-  background:#0d1e26;border:1px solid var(--line);color:var(--text);
-  border-radius:999px;padding:9px 12px;font-weight:600
-}
-button.primary{border-color:var(--gold);color:var(--gold)}
-.timeline{display:grid;gap:10px}
-.event{display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid var(--line);padding-bottom:10px}
-.days{font-size:28px;color:var(--gold);text-align:right}
-.mission{
-  margin-top:16px;text-align:center;padding:28px;font-size:24px;line-height:1.35;
-  color:var(--gold)
-}
-.footer{
-  margin-top:16px;display:grid;grid-template-columns:repeat(4,1fr);gap:12px
-}
-@media(max-width:850px){
-  .header,.grid,.phase{grid-template-columns:1fr}.status,.footer{grid-template-columns:1fr 1fr}
-  .instruments{grid-template-columns:1fr 1fr}.timeBox{text-align:left}
-}
-@media(max-width:520px){.status,.footer,.instruments{grid-template-columns:1fr}.phaseName{font-size:34px}}
+html,body{margin:0;min-height:100%;background:radial-gradient(circle at 50% -10%,#12303a 0,#041015 35%,#02070a 72%);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+button,input{font:inherit}
+.app{width:min(1220px,100%);margin:auto;padding:16px 16px 36px}
+.glass{background:linear-gradient(145deg,rgba(12,29,36,.95),rgba(5,13,17,.95));border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow)}
+.header{padding:20px;display:grid;grid-template-columns:1fr auto;gap:18px;align-items:center}
+.brand{display:flex;gap:14px;align-items:center}
+.emblem{width:72px;height:72px;border:1px solid var(--teal);border-radius:50%;display:grid;place-items:center;font-size:34px;box-shadow:0 0 28px rgba(53,224,208,.18)}
+h1{font-size:clamp(24px,4vw,44px);line-height:1;letter-spacing:.07em;color:var(--gold);margin:0}
+.tag{margin-top:7px;color:var(--orange)}
+.clock{font-size:clamp(28px,4vw,44px);font-variant-numeric:tabular-nums;color:var(--teal);text-align:right}
+.date,.aircraft{text-align:right}.date{color:var(--muted);margin-top:4px}.aircraft{color:var(--gold);font-size:13px;margin-top:4px;letter-spacing:.09em}
+.status{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin:14px 0}
+.tile,.panel{padding:16px}.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.14em;color:var(--muted)}
+.value{margin-top:6px;font-size:19px;color:var(--teal)}.gold{color:var(--gold)}.orange{color:var(--orange)}
+.shell{display:grid;grid-template-columns:230px 1fr;gap:14px}
+.sidebar{padding:14px;position:sticky;top:12px;height:max-content}
+.navBtn,.modeBtn{width:100%;display:flex;align-items:center;gap:10px;text-align:left;margin:0 0 8px;padding:12px;border:1px solid var(--line);background:rgba(8,19,25,.72);color:var(--text);border-radius:14px;cursor:pointer}
+.navBtn.active,.modeBtn.active{border-color:var(--teal);color:var(--teal);box-shadow:0 0 18px rgba(53,224,208,.12)}
+.modeBtn.turbulence.active{border-color:var(--orange);color:var(--orange)}
+.navIcon{font-size:20px}.sideLabel{font-size:11px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;margin:16px 4px 9px}
+.layout{display:grid;grid-template-columns:1.25fr .85fr;gap:14px}
+.panel h2{margin:0 0 14px;font-size:15px;text-transform:uppercase;letter-spacing:.12em;color:var(--gold)}
+.focus{display:grid;grid-template-columns:1fr 230px;gap:20px;align-items:center}
+.greeting{font-size:clamp(28px,4vw,48px);color:var(--teal);margin:4px 0}
+.modeMission{font-size:21px;color:var(--gold);margin:8px 0}
+.phaseLine{color:var(--orange);font-size:13px;letter-spacing:.1em}
+.nowTask{font-size:27px;margin:16px 0 5px}.nextTask{padding:13px;border:1px solid var(--line);border-radius:14px;background:rgba(8,19,25,.62);margin-top:13px}
+.ring{--pct:0%;width:210px;aspect-ratio:1;border-radius:50%;background:conic-gradient(var(--teal) var(--pct),rgba(255,255,255,.06) 0);display:grid;place-items:center;position:relative;margin:auto}
+.ring:after{content:"";position:absolute;inset:15px;border-radius:50%;background:#071218;border:1px solid var(--line)}
+.ringInner{z-index:1;text-align:center}.ringNum{font-size:34px;color:var(--gold)}
+.instruments{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.inst,.checkItem{border:1px solid var(--line);background:rgba(8,19,25,.76);border-radius:16px;padding:14px;cursor:pointer;transition:.2s}
+.inst{min-height:105px}.inst.done,.checkItem.done{border-color:var(--teal);box-shadow:0 0 20px rgba(53,224,208,.14);color:var(--teal)}
+.instIcon{font-size:26px}.instName{margin-top:8px}.instSub{font-size:12px;color:var(--muted);margin-top:3px}
+.tracker{display:grid;gap:12px}.meter{padding:14px;border:1px solid var(--line);border-radius:16px;background:rgba(8,19,25,.65)}
+.meterRow{display:flex;align-items:center;justify-content:space-between;gap:10px}.meterValue{font-size:22px;color:var(--gold)}
+.progress{height:9px;background:#10272f;border-radius:99px;overflow:hidden;margin-top:10px}.bar{height:100%;width:0;background:linear-gradient(90deg,var(--teal),var(--gold));transition:.25s width}
+.btnRow{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.btn{border:1px solid var(--line);background:#0c2028;color:var(--text);padding:9px 12px;border-radius:999px;cursor:pointer}.btn.primary{border-color:var(--gold);color:var(--gold)}.btn.reset{color:var(--orange)}
+.timeline{display:grid;gap:10px}.event{display:grid;grid-template-columns:1fr auto;gap:12px;padding-bottom:10px;border-bottom:1px solid var(--line)}.event:last-child{border-bottom:0}.days{font-size:26px;color:var(--gold);text-align:right}.eventDate{font-size:12px;color:var(--muted);margin-top:3px}
+.checkGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.checkItem{display:flex;gap:10px;align-items:center}.checkDot{font-size:18px}
+.clearance{margin-top:14px;padding:17px;border-radius:16px;border:1px solid var(--line);text-align:center;font-weight:700;letter-spacing:.08em}.clearance.ready{border-color:var(--good);color:var(--good);box-shadow:0 0 20px rgba(85,214,168,.12)}
+.turbulenceCard{border-color:var(--orange);background:linear-gradient(145deg,rgba(53,25,20,.82),rgba(16,12,10,.94))}
+.turbulenceCard h2,.turbulenceCard .modeMission{color:var(--orange)}
+.scheduleList{display:grid;gap:10px}.scheduleRow{padding:13px;border:1px solid var(--line);border-radius:14px;background:rgba(8,19,25,.62)}.scheduleRow.current{border-color:var(--teal);box-shadow:0 0 18px rgba(53,224,208,.12)}.scheduleTime{color:var(--gold);font-size:12px}.scheduleTitle{font-size:17px;margin-top:4px}.scheduleNote{font-size:12px;color:var(--muted);margin-top:4px}
+.hidden{display:none!important}.footer{margin-top:14px;padding:18px;text-align:center;color:var(--gold);font-size:18px;line-height:1.5}.small{font-size:12px;color:var(--muted)}
+@media(max-width:950px){.shell{grid-template-columns:1fr}.sidebar{position:static}.layout,.focus{grid-template-columns:1fr}.status{grid-template-columns:1fr 1fr}.instruments{grid-template-columns:1fr 1fr}.clock,.date,.aircraft{text-align:left}.header{grid-template-columns:1fr}}
+@media(max-width:560px){.status,.instruments,.checkGrid{grid-template-columns:1fr}.app{padding:10px 10px 28px}.header{padding:16px}.emblem{width:58px;height:58px;font-size:27px}.panel,.tile{padding:14px}}
 </style>
 </head>
 <body>
 <div class="app">
-  <header class="header">
-    <div class="logoRow">
-      <div class="mark">🪷</div>
+<header class="header glass">
+  <div class="brand">
+    <div class="emblem">🪷</div>
+    <div><h1>DRAGONFLY<br>DAILY FLIGHT PLAN</h1><div class="tag">One day. One mission. One intentional life.</div></div>
+  </div>
+  <div><div id="clock" class="clock">--:--</div><div id="date" class="date"></div><div class="aircraft">AIRCRAFT DFP-001 · CAPTAIN REN</div></div>
+</header>
+
+<section class="status">
+  <div class="tile glass"><div class="eyebrow">Flight Status</div><div id="flightStatus" class="value">ON COURSE ●</div></div>
+  <div class="tile glass"><div class="eyebrow">Operating Mode</div><div id="modeTop" class="value gold">HOME MODE</div></div>
+  <div class="tile glass"><div class="eyebrow">Current Phase</div><div id="phaseTop" class="value">PREFLIGHT</div></div>
+  <div class="tile glass"><div class="eyebrow">Water</div><div id="waterTop" class="value">0 / 128 oz</div></div>
+  <div class="tile glass"><div class="eyebrow">Protein</div><div id="proteinTop" class="value gold">0 / 170 g</div></div>
+</section>
+
+<div class="shell">
+<aside class="sidebar glass">
+  <div class="sideLabel">Operating Mode</div>
+  <button class="modeBtn" data-mode="home"><span class="navIcon">🏡</span><span>Home Mode</span></button>
+  <button class="modeBtn" data-mode="flight"><span class="navIcon">✈️</span><span>Flight Attendant Mode</span></button>
+  <button class="modeBtn turbulence" data-mode="turbulence"><span class="navIcon">🌪</span><span>Turbulence Mode</span></button>
+  <div class="sideLabel">Navigation</div>
+  <button class="navBtn active" data-target="dashboard"><span class="navIcon">⌂</span><span>Now</span></button>
+  <button class="navBtn" data-target="schedulePanel"><span class="navIcon">◷</span><span>Day at a Glance</span></button>
+  <button class="navBtn" data-target="timelinePanel"><span class="navIcon">⌛</span><span>Milestones</span></button>
+</aside>
+
+<div>
+<main class="layout">
+  <section id="dashboard" class="panel glass">
+    <h2>Focus Panel</h2>
+    <div class="focus">
       <div>
-        <h1>DRAGONFLY<br>DAILY FLIGHT PLAN</h1>
-        <div class="tag">One day. One mission. One intentional life.</div>
+        <div class="eyebrow">Current Briefing</div>
+        <div id="greeting" class="greeting">Good Morning, Ren</div>
+        <div id="modeMission" class="modeMission">Build Dragonfly Bliss forward.</div>
+        <div id="phaseLine" class="phaseLine">PREFLIGHT · 3:00 AM – 6:00 AM</div>
+        <div class="eyebrow" style="margin-top:16px">Now</div>
+        <div id="nowTask" class="nowTask">Morning Preflight</div>
+        <div id="nowNote" class="small">Water, devotion, stretch, and orient the day.</div>
+        <div class="nextTask">
+          <div class="eyebrow">Next</div>
+          <strong id="nextTask">Departure</strong>
+          <div id="nextTime" class="small">6:00 AM</div>
+        </div>
+      </div>
+      <div class="ring" id="ring"><div class="ringInner"><div class="eyebrow">Mode Systems</div><div class="ringNum" id="ringNum">0/9</div><div class="small">complete</div></div></div>
+    </div>
+  </section>
+
+  <section id="timelinePanel" class="panel glass"><h2>Dynamic Timeline</h2><div id="timeline" class="timeline"></div></section>
+
+  <section id="homePanel" class="panel glass">
+    <h2>Home Mode Instruments</h2>
+    <div id="homeInstruments" class="instruments"></div>
+  </section>
+
+  <section id="flightPanel" class="panel glass hidden">
+    <h2>Preflight Checklist</h2>
+    <div id="flightChecklist" class="checkGrid"></div>
+    <div id="flightClearance" class="clearance">PREPARING FOR DEPARTURE</div>
+  </section>
+
+  <section id="turbulencePanel" class="panel glass turbulenceCard hidden">
+    <h2>Turbulence Protocol</h2>
+    <div class="modeMission">Stabilize. Nothing else is required today.</div>
+    <div id="turbulenceChecklist" class="checkGrid"></div>
+    <div id="turbulenceClearance" class="clearance">STABILIZING</div>
+  </section>
+
+  <section id="schedulePanel" class="panel glass">
+    <h2>Day at a Glance</h2>
+    <div id="scheduleList" class="scheduleList"></div>
+  </section>
+
+  <section id="trackerPanel" class="panel glass">
+    <h2>Water & Protein Command</h2>
+    <div class="tracker">
+      <div class="meter">
+        <div class="meterRow"><div><div class="eyebrow">Water Mission</div><div class="small">Target: one gallon</div></div><div id="waterValue" class="meterValue">0 oz</div></div>
+        <div class="progress"><div id="waterBar" class="bar"></div></div>
+        <div class="btnRow"><button class="btn primary" onclick="addWater(8)">+8 oz</button><button class="btn" onclick="addWater(12)">+12 oz</button><button class="btn" onclick="addWater(20)">+20 oz</button><button class="btn reset" onclick="resetWater()">Reset</button></div>
+      </div>
+      <div class="meter">
+        <div class="meterRow"><div><div class="eyebrow">Protein Mission</div><div class="small">Target: 170 grams</div></div><div id="proteinValue" class="meterValue">0 g</div></div>
+        <div class="progress"><div id="proteinBar" class="bar"></div></div>
+        <div class="btnRow"><button class="btn primary" onclick="addProtein(10)">+10 g</button><button class="btn" onclick="addProtein(20)">+20 g</button><button class="btn" onclick="addProtein(30)">+30 g</button><button class="btn reset" onclick="resetProtein()">Reset</button></div>
       </div>
     </div>
-    <div class="timeBox">
-      <div class="clock" id="clock">--:--</div>
-      <div class="date" id="date">Loading...</div>
-      <div class="tag">Aircraft DFP-001</div>
-    </div>
-  </header>
-
-  <section class="status">
-    <div class="stat"><div class="label">Flight Status</div><div class="value">ON COURSE ●</div></div>
-    <div class="stat"><div class="label">Mission</div><div class="value gold" id="missionType">HOME DAY</div></div>
-    <div class="stat"><div class="label">Water</div><div class="value" id="waterText">0 / 128 oz</div></div>
-    <div class="stat"><div class="label">Protein</div><div class="value gold" id="proteinText">0 / 170 g</div></div>
-    <div class="stat"><div class="label">Bedtime</div><div class="value orange">9:30 PM</div></div>
   </section>
+</main>
 
-  <main class="grid">
-    <section class="card">
-      <h2 class="sectionTitle">Now: Cockpit Dashboard</h2>
-      <div class="phase">
-        <div>
-          <div class="label">Current Phase</div>
-          <div class="phaseName" id="phaseName">PREFLIGHT</div>
-          <p class="mini" id="phaseWindow">3:00 AM – 6:00 AM</p>
-          <p id="phaseNote">Start gently. Water, devotion, stretch, and orient the day.</p>
-        </div>
-        <div class="ring" id="ring" style="--pct:0%">
-          <div class="ringInner">
-            <div class="label">Daily Systems</div>
-            <div class="big" id="completeCount">0/9</div>
-            <div class="mini">complete</div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="card">
-      <h2 class="sectionTitle">Flight Timeline</h2>
-      <div class="timeline" id="timeline"></div>
-    </section>
-
-    <section class="card">
-      <h2 class="sectionTitle">Daily Instruments</h2>
-      <div class="instruments" id="instruments"></div>
-
-      <div class="card" style="margin-top:14px">
-        <div class="label">Water Log</div>
-        <div class="btns">
-          <button class="primary" onclick="addWater(8)">+8 oz</button>
-          <button onclick="addWater(16)">+16 oz</button>
-          <button onclick="resetWater()">Reset</button>
-        </div>
-        <div class="progress"><div class="bar" id="waterBar"></div></div>
-      </div>
-
-      <div class="card" style="margin-top:14px">
-        <div class="label">Protein Log</div>
-        <div class="btns">
-          <button class="primary" onclick="addProtein(20)">+20 g</button>
-          <button onclick="addProtein(40)">+40 g</button>
-          <button onclick="resetProtein()">Reset</button>
-        </div>
-        <div class="progress"><div class="bar" id="proteinBar"></div></div>
-      </div>
-    </section>
-
-    <section class="card">
-      <h2 class="sectionTitle">System Check</h2>
-      <p><span class="gold">Today’s Mission:</span><br>Build the life you want to come home to.</p>
-      <p><span class="gold">Turbulence Protocol:</span><br>When the day breaks down, return to the minimum wins: water, stretch, devotion, food, and rest.</p>
-      <p><span class="gold">Private Motto:</span><br>Today, I choose to build the life I want to come home to.</p>
-    </section>
-  </main>
-
-  <section class="card mission">
-    The goal isn’t to do everything.<br>
-    The goal is to move the life I’m building forward today.
-  </section>
-
-  <section class="footer">
-    <div class="stat"><div class="label">Altitude</div><div class="value">LIVING WELL</div></div>
-    <div class="stat"><div class="label">Heading</div><div class="value gold">INTENTIONAL</div></div>
-    <div class="stat"><div class="label">Destination</div><div class="value">A LIFE I LOVE</div></div>
-    <div class="stat"><div class="label">Systems Designer</div><div class="value orange">SAGE</div></div>
-  </section>
+<section class="footer glass">The goal isn't to do everything.<br>The goal is to move the life I'm building forward today.</section>
+</div>
+</div>
 </div>
 
 <script>
-const todayKey = new Date().toISOString().slice(0,10);
-const saved = JSON.parse(localStorage.getItem("dfp-" + todayKey) || "{}");
-let water = saved.water || 0;
-let protein = saved.protein || 0;
-let done = saved.done || {};
+const dayKey='dfp-'+new Date().toLocaleDateString('en-CA');
+const defaultState={mode:'home',water:0,protein:0,home:{},flight:{},turbulence:{}};
+const state=Object.assign(defaultState,JSON.parse(localStorage.getItem(dayKey)||'{}'));
+state.home=state.home||{};state.flight=state.flight||{};state.turbulence=state.turbulence||{};
 
-const instruments = [
-  ["stretch","🧘","Stretch","Minimum win: 3 minutes"],
-  ["exercise","🏋🏾","Exercise","Minimum win: 10 minutes"],
-  ["photo","📷","Take One Photo","Capture one mood"],
-  ["devotion","🙏","Devotion","Start centered"],
-  ["protein","🥩","Protein Goal","Target: 170 g"],
-  ["read","📖","Read 20 Minutes","A few pages count"],
-  ["sunshine","☀️","Sunshine","10 minutes outside"],
-  ["water","💧","1 Gallon Water","Target: 128 oz"],
-  ["bills","💰","Bills & Due Dates","Quick daily review"]
+const homeItems=[
+ ['stretch','🧘','Stretch','Minimum win: 3 minutes'],
+ ['exercise','🏋🏾','Exercise','Minimum win: 10 minutes'],
+ ['photo','📷','Take one photo','Capture one mood'],
+ ['devotion','🙏','Devotion','Start centered'],
+ ['read','📖','Read 20 minutes','A few pages count'],
+ ['sunshine','☀️','Sunshine','10 minutes outside'],
+ ['bills','💰','Bills & due dates','Quick daily review'],
+ ['garden','🌿','Dragonfly Bliss','Move one project forward'],
+ ['meal','🍽️','Meal preparation','Fuel future Ren']
+];
+const flightItems=[
+ ['uniform','Uniform ready'],['badge','Crew badge and ID'],['food','Food bag packed'],
+ ['camera','Camera and batteries'],['chargers','Chargers packed'],['passport','Passport if needed'],
+ ['waterBottle','Water bottle'],['compression','Compression socks'],['vitamins','Vitamins and medications'],
+ ['workout','Workout clothes'],['hotel','Hotel essentials']
+];
+const turbulenceItems=[
+ ['hydrate','Drink water'],['eat','Eat something nourishing'],['stretch','Stretch 3 minutes'],
+ ['shower','Shower or wash face'],['outside','Five minutes outside'],['text','Text one person']
+];
+const events=[
+ ['Vacation','2026-08-01','🌴','Protected time'],
+ ['Texas AFL-CIO Scholarship Committee Meeting','2026-08-11T09:00:00','🎓','9:00 AM'],
+ ['Van to LGA – Pratt Institute – Brooklyn','2026-08-18','🛫','Travel waypoint'],
+ ['Cadillac Paid Off','2026-09-20','🚗','Financial milestone'],
+ ['Tye Shirley Wedding','2026-12-03','💍','Celebration']
 ];
 
-const events = [
-  ["Vacation","2026-08-01","🌴"],
-  ["Texas AFL-CIO Scholarship Committee Meeting","2026-08-11T09:00:00","🎓"],
-  ["Van to LGA – Pratt Institute – Brooklyn","2026-08-18","🛫"],
-  ["Cadillac Paid Off","2026-09-20","🚗"],
-  ["Tye Shirley Wedding","2026-12-03","💍"]
-];
+const schedules={
+ home:[
+  [3,6,'Morning Preflight','Water, devotion, stretch, and prepare the day.'],
+  [6,10,'Departure','Breakfast, bills, exercise, or first home priority.'],
+  [10,14,'Cruise','Dragonfly Bliss, photography, projects, or focused work.'],
+  [14,18,'Approach','Errands, reading, reset, and prepare dinner.'],
+  [18,21.5,'At the Gate','Dinner, reflection, tomorrow prep, and wind down.'],
+  [21.5,27,'Lights Out','Rest is part of the mission.']
+ ],
+ flight:[
+  [3,6,'Crew Preflight','Uniform, food bag, badge, water, and departure preparation.'],
+  [6,10,'Report & Departure','Airport, sign-in, crew briefing, and first leg.'],
+  [10,14,'Inflight Operations','Service, hydration, protein, and passenger care.'],
+  [14,18,'Arrival / Turn','Arrival duties, van, hotel, or next leg.'],
+  [18,21.5,'Layover Reset','Eat, shower, charge devices, and protect rest.'],
+  [21.5,27,'Crew Rest','Sleep is operational readiness.']
+ ],
+ turbulence:[
+  [3,6,'Stabilize','Water and one quiet minute.'],
+  [6,10,'Nourish','Eat something and take essential medications.'],
+  [10,14,'Ground','Stretch or step outside briefly.'],
+  [14,18,'Reduce','Cancel what can wait.'],
+  [18,21.5,'Restore','Shower, comfort, and low stimulation.'],
+  [21.5,27,'Rest','Nothing more is required.']
+ ]
+};
 
-function save(){localStorage.setItem("dfp-"+todayKey, JSON.stringify({water,protein,done}))}
+function save(){localStorage.setItem(dayKey,JSON.stringify(state))}
+function safeDate(value){return new Date(value.includes('T')?value:value+'T12:00:00')}
+function currentModeLabel(){return state.mode==='flight'?'FLIGHT ATTENDANT':state.mode==='turbulence'?'TURBULENCE':'HOME'}
+function currentSchedule(){return schedules[state.mode]}
+function currentBucket(){return state[state.mode]}
+function currentItems(){return state.mode==='flight'?flightItems:state.mode==='turbulence'?turbulenceItems:homeItems}
 
-function updateClock(){
-  const now=new Date();
-  document.getElementById("clock").textContent=now.toLocaleTimeString([], {hour:"numeric",minute:"2-digit"});
-  document.getElementById("date").textContent=now.toLocaleDateString([], {weekday:"long",month:"long",day:"numeric",year:"numeric"});
-  const h=now.getHours()+now.getMinutes()/60;
-  let phase="PREFLIGHT", win="3:00 AM – 6:00 AM", note="Start gently. Water, devotion, stretch, and orient the day.";
-  if(h>=6 && h<10){phase="DEPARTURE";win="6:00 AM – 10:00 AM";note="Launch the day. Handle essentials and protect your energy."}
-  else if(h>=10 && h<14){phase="CRUISE";win="10:00 AM – 2:00 PM";note="Steady progress. One intentional task at a time."}
-  else if(h>=14 && h<18){phase="APPROACH";win="2:00 PM – 6:00 PM";note="Wrap, reset, hydrate, and prepare for evening."}
-  else if(h>=18 && h<21.5){phase="AT THE GATE";win="6:00 PM – 9:30 PM";note="Evening routine. Reflect, restore, and prepare for sleep."}
-  else {phase="LIGHTS OUT";win="9:30 PM – 3:00 AM";note="Rest is part of the mission."}
-  document.getElementById("phaseName").textContent=phase;
-  document.getElementById("phaseWindow").textContent=win;
-  document.getElementById("phaseNote").textContent=note;
+function determineSpecialMission(){
+ const now=new Date();
+ const vacationStart=safeDate('2026-08-01'),vacationEnd=safeDate('2026-08-07');
+ if(now>=vacationStart&&now<=vacationEnd)return 'VACATION · REST, EXPLORE, RECHARGE';
+ return state.mode==='flight'?'WORK TRIP':state.mode==='turbulence'?'STABILIZE':'BUILD THE LIFE YOU WANT TO COME HOME TO';
 }
-setInterval(updateClock,1000); updateClock();
-
-function renderInstruments(){
-  const el=document.getElementById("instruments"); el.innerHTML="";
-  instruments.forEach(([key,icon,name,mini])=>{
-    const div=document.createElement("div");
-    div.className="inst "+(done[key]?"done":"");
-    div.onclick=()=>{done[key]=!done[key]; save(); renderInstruments();};
-    div.innerHTML=`<div class="icon">${icon}</div><div class="instName">${done[key]?"✅ ":""}${name}</div><div class="mini">${mini}</div>`;
-    el.appendChild(div);
-  });
-  const count=Object.values(done).filter(Boolean).length;
-  document.getElementById("completeCount").textContent=count+"/9";
-  document.getElementById("ring").style.setProperty("--pct",(count/9*100)+"%");
+function clock(){
+ const n=new Date();
+ document.getElementById('clock').textContent=n.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'});
+ document.getElementById('date').textContent=n.toLocaleDateString([], {weekday:'long',month:'long',day:'numeric',year:'numeric'});
+ const h=n.getHours()+n.getMinutes()/60;
+ const schedule=currentSchedule();
+ let idx=schedule.findIndex(([start,end])=>end>24?(h>=start||h<end-24):(h>=start&&h<end));
+ if(idx<0)idx=0;
+ const [start,end,title,note]=schedule[idx];
+ const next=schedule[(idx+1)%schedule.length];
+ const timeLabel=start===21.5?'9:30 PM':formatHour(start);
+ const endLabel=end===21.5?'9:30 PM':end>24?formatHour(end-24):formatHour(end);
+ document.getElementById('phaseTop').textContent=title.toUpperCase();
+ document.getElementById('phaseLine').textContent=title.toUpperCase()+' · '+timeLabel+' – '+endLabel;
+ document.getElementById('nowTask').textContent=title;
+ document.getElementById('nowNote').textContent=note;
+ document.getElementById('nextTask').textContent=next[2];
+ document.getElementById('nextTime').textContent=next[0]===21.5?'9:30 PM':formatHour(next[0]);
+ const greeting=h<12?'Good Morning, Ren':h<18?'Good Afternoon, Ren':h<21.5?'Good Evening, Ren':'Rest Well, Ren';
+ document.getElementById('greeting').textContent=greeting;
+ renderSchedule(idx);
+}
+function formatHour(h){
+ const hour=Math.floor(h),mins=h%1?30:0,period=hour>=12?'PM':'AM',display=hour%12||12;
+ return display+':'+String(mins).padStart(2,'0')+' '+period;
+}
+function setMode(mode){
+ state.mode=mode;save();renderAll();
+}
+function renderModeButtons(){
+ document.querySelectorAll('.modeBtn').forEach(b=>b.classList.toggle('active',b.dataset.mode===state.mode));
+ document.getElementById('modeTop').textContent=currentModeLabel()+' MODE';
+ document.getElementById('modeMission').textContent=determineSpecialMission();
+ document.getElementById('flightStatus').textContent=state.mode==='turbulence'?'STABILIZING ●':state.mode==='flight'?'CREW READY ●':'ON COURSE ●';
+ document.getElementById('homePanel').classList.toggle('hidden',state.mode!=='home');
+ document.getElementById('flightPanel').classList.toggle('hidden',state.mode!=='flight');
+ document.getElementById('turbulencePanel').classList.toggle('hidden',state.mode!=='turbulence');
+ document.getElementById('trackerPanel').classList.toggle('hidden',state.mode==='turbulence');
+}
+function renderHome(){
+ const box=document.getElementById('homeInstruments');box.innerHTML='';
+ homeItems.forEach(([id,icon,name,sub])=>{
+  const d=document.createElement('div');d.className='inst'+(state.home[id]?' done':'');
+  d.innerHTML=`<div class="instIcon">${icon}</div><div class="instName">${state.home[id]?'✓ ':''}${name}</div><div class="instSub">${sub}</div>`;
+  d.onclick=()=>{state.home[id]=!state.home[id];save();renderHome();updateRing()};box.appendChild(d);
+ });
+}
+function renderChecklist(target,items,bucket,clearanceId){
+ const box=document.getElementById(target);box.innerHTML='';
+ items.forEach(([id,label])=>{
+  const d=document.createElement('div');d.className='checkItem'+(state[bucket][id]?' done':'');
+  d.innerHTML=`<span class="checkDot">${state[bucket][id]?'✓':'○'}</span><span>${label}</span>`;
+  d.onclick=()=>{state[bucket][id]=!state[bucket][id];save();renderChecklist(target,items,bucket,clearanceId);updateRing()};
+  box.appendChild(d);
+ });
+ const ready=items.every(([id])=>state[bucket][id]);
+ const c=document.getElementById(clearanceId);
+ if(c){
+  c.className='clearance'+(ready?' ready':'');
+  c.textContent=ready?(bucket==='flight'?'READY FOR DEPARTURE':'STABILIZED'):(bucket==='flight'?'PREPARING FOR DEPARTURE':'STABILIZING');
+ }
+}
+function updateRing(){
+ const items=currentItems(),bucket=currentBucket();
+ let complete=items.filter(([id])=>bucket[id]).length;
+ if(state.mode!=='turbulence'){
+  if(state.water>=128)complete++;
+  if(state.protein>=170)complete++;
+ }
+ const total=items.length+(state.mode==='turbulence'?0:2);
+ document.getElementById('ringNum').textContent=complete+'/'+total;
+ document.getElementById('ring').style.setProperty('--pct',(complete/total*100)+'%');
+}
+function renderSchedule(currentIdx){
+ const box=document.getElementById('scheduleList');box.innerHTML='';
+ currentSchedule().forEach(([start,end,title,note],i)=>{
+  const d=document.createElement('div');d.className='scheduleRow'+(i===currentIdx?' current':'');
+  const startLabel=start===21.5?'9:30 PM':formatHour(start);
+  const endLabel=end===21.5?'9:30 PM':end>24?formatHour(end-24):formatHour(end);
+  d.innerHTML=`<div class="scheduleTime">${startLabel} – ${endLabel}</div><div class="scheduleTitle">${i===currentIdx?'➤ ':''}${title}</div><div class="scheduleNote">${note}</div>`;
+  box.appendChild(d);
+ });
 }
 function renderTimeline(){
-  const el=document.getElementById("timeline"); el.innerHTML="";
-  const now=new Date();
-  events.forEach(([name,date,icon])=>{
-    const target=new Date(date);
-    const days=Math.ceil((target-now)/(1000*60*60*24));
-    const row=document.createElement("div");
-    row.className="event";
-    row.innerHTML=`<div><strong>${icon} ${name}</strong><div class="mini">${target.toLocaleDateString([], {month:"long",day:"numeric",year:"numeric"})}</div></div><div class="days">${days}<div class="mini">days</div></div>`;
-    el.appendChild(row);
-  });
+ const box=document.getElementById('timeline');box.innerHTML='';const now=new Date();
+ events.forEach(([name,date,icon,note])=>{
+  const t=safeDate(date),days=Math.max(0,Math.ceil((t-now)/86400000));
+  const d=document.createElement('div');d.className='event';
+  const time=date.includes('T')?' · 9:00 AM':'';
+  d.innerHTML=`<div><strong>${icon} ${name}</strong><div class="eventDate">${t.toLocaleDateString([], {month:'long',day:'numeric',year:'numeric'})}${time}<br>${note}</div></div><div class="days">${days}<div class="small">days</div></div>`;
+  box.appendChild(d);
+ });
 }
 function updateMeters(){
-  document.getElementById("waterText").textContent=water+" / 128 oz";
-  document.getElementById("proteinText").textContent=protein+" / 170 g";
-  document.getElementById("waterBar").style.width=Math.min(100,water/128*100)+"%";
-  document.getElementById("proteinBar").style.width=Math.min(100,protein/170*100)+"%";
-  done.water = water>=128;
-  done.protein = protein>=170;
-  save(); renderInstruments();
+ document.getElementById('waterTop').textContent=state.water+' / 128 oz';
+ document.getElementById('proteinTop').textContent=state.protein+' / 170 g';
+ document.getElementById('waterValue').textContent=state.water+' oz';
+ document.getElementById('proteinValue').textContent=state.protein+' g';
+ document.getElementById('waterBar').style.width=Math.min(100,state.water/128*100)+'%';
+ document.getElementById('proteinBar').style.width=Math.min(100,state.protein/170*100)+'%';
+ save();updateRing();
 }
-function addWater(x){water=Math.min(128,water+x);updateMeters()}
-function resetWater(){water=0;updateMeters()}
-function addProtein(x){protein=Math.min(170,protein+x);updateMeters()}
-function resetProtein(){protein=0;updateMeters()}
-renderTimeline(); renderInstruments(); updateMeters();
+function addWater(n){state.water=Math.min(128,state.water+n);updateMeters()}
+function resetWater(){state.water=0;updateMeters()}
+function addProtein(n){state.protein=Math.min(170,state.protein+n);updateMeters()}
+function resetProtein(){state.protein=0;updateMeters()}
+function bindNavigation(){
+ document.querySelectorAll('.modeBtn').forEach(b=>b.onclick=()=>setMode(b.dataset.mode));
+ document.querySelectorAll('.navBtn').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('.navBtn').forEach(x=>x.classList.remove('active'));b.classList.add('active');
+  document.getElementById(b.dataset.target).scrollIntoView({behavior:'smooth',block:'start'});
+ });
+}
+function renderAll(){
+ renderModeButtons();renderHome();
+ renderChecklist('flightChecklist',flightItems,'flight','flightClearance');
+ renderChecklist('turbulenceChecklist',turbulenceItems,'turbulence','turbulenceClearance');
+ renderTimeline();updateMeters();clock();
+}
+bindNavigation();renderAll();setInterval(clock,1000);
 </script>
 </body>
 </html>
