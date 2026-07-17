@@ -1,0 +1,2293 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<meta name="theme-color" content="#031015" />
+<title>Ren OS Genesis · Unified Command — Clock Restored</title>
+<style>
+:root{
+  --bg:#02070a;--panel:#081319;--panel2:#0c1d24;--line:#1d3a42;
+  --teal:#35e0d0;--gold:#e9b95c;--orange:#f28a45;--text:#f6f1e8;
+  --muted:#9eb2b8;--good:#55d6a8;--danger:#ff8c69;--modeAccent:var(--teal);--modeGlow:rgba(53,224,208,.16);
+  --shadow:0 18px 60px rgba(0,0,0,.36)
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:radial-gradient(circle at 50% -10%,#12303a 0,#041015 35%,#02070a 72%);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+button,input{font:inherit}
+.app{width:min(1220px,100%);margin:auto;padding:16px 16px 36px;transition:.3s ease}
+.glass{background:linear-gradient(145deg,rgba(12,29,36,.95),rgba(5,13,17,.95));border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow)}
+.header{padding:20px;display:grid;grid-template-columns:1fr auto;gap:18px;align-items:center}
+.brand{display:flex;gap:14px;align-items:center}
+.emblem{width:72px;height:72px;border:1px solid var(--teal);border-radius:50%;display:grid;place-items:center;font-size:34px;box-shadow:0 0 28px rgba(53,224,208,.18)}
+h1{font-size:clamp(24px,4vw,44px);line-height:1;letter-spacing:.07em;color:var(--gold);margin:0}
+.tag{margin-top:7px;color:var(--orange)}
+.clock{font-size:clamp(28px,4vw,44px);font-variant-numeric:tabular-nums;color:var(--teal);text-align:right}
+.date,.aircraft{text-align:right}.date{color:var(--muted);margin-top:4px}.aircraft{color:var(--gold);font-size:13px;margin-top:4px;letter-spacing:.09em}
+.status{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin:14px 0}
+.tile,.panel{padding:16px}.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.14em;color:var(--muted)}
+.value{margin-top:6px;font-size:19px;color:var(--teal)}.gold{color:var(--gold)}.orange{color:var(--orange)}
+.shell{display:grid;grid-template-columns:230px 1fr;gap:14px}
+.sidebar{padding:14px;position:sticky;top:12px;height:max-content}
+.modeSwitcher{display:grid;gap:10px}.navBtn,.modeBtn{width:100%;display:flex;align-items:center;gap:10px;text-align:left;margin:0 0 8px;padding:12px;border:1px solid var(--line);background:rgba(8,19,25,.72);color:var(--text);border-radius:14px;cursor:pointer}
+.navBtn.active{border-color:var(--teal);color:var(--teal);box-shadow:0 0 18px rgba(53,224,208,.12)}.modeBtn{position:relative;overflow:hidden}.modeBtn:before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,var(--modeGlow),transparent);opacity:0;transition:.2s}.modeBtn.active{border-color:var(--modeAccent);color:var(--modeAccent);box-shadow:0 0 22px var(--modeGlow)}.modeBtn.active:before{opacity:1}.modeBtn span{position:relative;z-index:1}
+.modeBtn.turbulence.active{border-color:var(--orange);color:var(--orange)}.modeCopy{display:grid;gap:2px}.modeName{font-weight:700}.modeDesc{font-size:11px;color:var(--muted)}.modeBtn.active .modeDesc{color:inherit;opacity:.8}.modeIndicator{margin-left:auto;width:9px;height:9px;border-radius:50%;background:transparent;border:1px solid currentColor}.modeBtn.active .modeIndicator{background:currentColor;box-shadow:0 0 12px currentColor}.modeBanner{margin:0 0 14px;padding:13px 15px;border:1px solid var(--modeAccent);border-radius:16px;background:linear-gradient(90deg,var(--modeGlow),transparent);display:flex;align-items:center;justify-content:space-between;gap:12px}.modeBanner strong{color:var(--modeAccent);letter-spacing:.08em}.modeBanner .small{max-width:620px}
+.navIcon{font-size:20px}.sideLabel{font-size:11px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;margin:16px 4px 9px}
+.layout{display:grid;grid-template-columns:1.25fr .85fr;gap:14px}
+.panel h2{margin:0 0 14px;font-size:15px;text-transform:uppercase;letter-spacing:.12em;color:var(--gold)}
+.focus{display:grid;grid-template-columns:1fr 230px;gap:20px;align-items:center}
+.focusStack{display:grid;gap:12px}
+.focusBlock{padding:15px;border:1px solid var(--line);border-radius:16px;background:rgba(8,19,25,.64)}
+.focusBlock.current{border-color:var(--modeAccent);box-shadow:0 0 20px var(--modeGlow)}
+.focusLabel{font-size:11px;text-transform:uppercase;letter-spacing:.16em;color:var(--muted)}
+.focusTitle{font-size:clamp(22px,3vw,34px);margin-top:6px;color:var(--text)}
+.focusTime{margin-top:5px;color:var(--orange);font-size:13px;letter-spacing:.08em}
+.focusNote{margin-top:7px;color:var(--muted);font-size:13px;line-height:1.45}
+.laterList{display:grid;gap:8px;margin-top:10px}
+.laterItem{display:grid;grid-template-columns:auto 1fr auto;gap:9px;align-items:center;padding:10px 0;border-bottom:1px solid rgba(29,58,66,.7)}
+.laterItem:last-child{border-bottom:0}
+.laterIcon{font-size:19px}.laterName{font-size:15px}.laterTime{font-size:12px;color:var(--gold)}
+
+.greeting{font-size:clamp(28px,4vw,48px);color:var(--teal);margin:4px 0}
+.modeMission{font-size:21px;color:var(--gold);margin:8px 0}
+.phaseLine{color:var(--orange);font-size:13px;letter-spacing:.1em}
+.nowTask{font-size:27px;margin:16px 0 5px}.nextTask{padding:13px;border:1px solid var(--line);border-radius:14px;background:rgba(8,19,25,.62);margin-top:13px}
+.ring{--pct:0%;width:210px;aspect-ratio:1;border-radius:50%;background:conic-gradient(var(--teal) var(--pct),rgba(255,255,255,.06) 0);display:grid;place-items:center;position:relative;margin:auto}
+.ring:after{content:"";position:absolute;inset:15px;border-radius:50%;background:#071218;border:1px solid var(--line)}
+.ringInner{z-index:1;text-align:center}.ringNum{font-size:34px;color:var(--gold)}
+.instruments{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.inst,.checkItem{border:1px solid var(--line);background:rgba(8,19,25,.76);border-radius:16px;padding:14px;cursor:pointer;transition:.2s}
+.inst{min-height:105px}.inst.done,.checkItem.done{border-color:var(--teal);box-shadow:0 0 20px rgba(53,224,208,.14);color:var(--teal)}
+.instIcon{font-size:26px}.instName{margin-top:8px}.instSub{font-size:12px;color:var(--muted);margin-top:3px}
+.tracker{display:grid;gap:12px}.meter{padding:14px;border:1px solid var(--line);border-radius:16px;background:rgba(8,19,25,.65)}
+.meterRow{display:flex;align-items:center;justify-content:space-between;gap:10px}.meterValue{font-size:22px;color:var(--gold)}
+.progress{height:9px;background:#10272f;border-radius:99px;overflow:hidden;margin-top:10px}.bar{height:100%;width:0;background:linear-gradient(90deg,var(--teal),var(--gold));transition:.25s width}
+.btnRow{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.btn{border:1px solid var(--line);background:#0c2028;color:var(--text);padding:9px 12px;border-radius:999px;cursor:pointer}.btn.primary{border-color:var(--gold);color:var(--gold)}.btn.reset{color:var(--orange)}
+.timeline{display:grid;gap:10px}.event{display:grid;grid-template-columns:1fr auto;gap:12px;padding-bottom:10px;border-bottom:1px solid var(--line)}.event:last-child{border-bottom:0}.days{font-size:26px;color:var(--gold);text-align:right}.eventDate{font-size:12px;color:var(--muted);margin-top:3px}
+.checkGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.checkItem{display:flex;gap:10px;align-items:center}.checkDot{font-size:18px}
+.clearance{margin-top:14px;padding:17px;border-radius:16px;border:1px solid var(--line);text-align:center;font-weight:700;letter-spacing:.08em}.clearance.ready{border-color:var(--good);color:var(--good);box-shadow:0 0 20px rgba(85,214,168,.12)}
+.turbulenceCard{border-color:var(--orange);background:linear-gradient(145deg,rgba(53,25,20,.82),rgba(16,12,10,.94))}
+.turbulenceCard h2,.turbulenceCard .modeMission{color:var(--orange)}
+.scheduleList{display:grid;gap:10px}.scheduleRow{padding:13px;border:1px solid var(--line);border-radius:14px;background:rgba(8,19,25,.62)}.scheduleRow.current{border-color:var(--teal);box-shadow:0 0 18px rgba(53,224,208,.12)}.scheduleTime{color:var(--gold);font-size:12px}.scheduleTitle{font-size:17px;margin-top:4px}.scheduleNote{font-size:12px;color:var(--muted);margin-top:4px}
+.hidden{display:none!important}.footer{margin-top:14px;padding:18px;text-align:center;color:var(--gold);font-size:18px;line-height:1.5}.small{font-size:12px;color:var(--muted)}
+
+.managerGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field{display:grid;gap:6px}.field.full{grid-column:1/-1}
+.field label{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted)}
+.field input,.field select,.field textarea{width:100%;border:1px solid var(--line);background:#07151b;color:var(--text);border-radius:12px;padding:11px}
+.field textarea{min-height:82px;resize:vertical}
+.managerActions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.savedList{display:grid;gap:10px;margin-top:16px}
+.savedItem{display:grid;grid-template-columns:1fr auto;gap:12px;padding:13px;border:1px solid var(--line);border-radius:14px;background:rgba(8,19,25,.66)}
+.savedMeta{font-size:12px;color:var(--muted);margin-top:4px}.deleteBtn{align-self:center;border:1px solid rgba(255,140,105,.5);background:transparent;color:var(--danger);padding:8px 10px;border-radius:10px;cursor:pointer}
+.managerNotice{padding:12px;border:1px solid var(--teal);border-radius:12px;color:var(--teal);background:rgba(53,224,208,.06);margin-bottom:14px}
+@media(max-width:700px){.managerGrid{grid-template-columns:1fr}.field.full{grid-column:auto}}
+
+
+.flightOpsGrid{display:grid;grid-template-columns:1.1fr .9fr;gap:14px}
+.opsCard{padding:16px;border:1px solid var(--line);border-radius:16px;background:rgba(8,19,25,.68)}
+.opsHero{border-color:var(--gold);background:linear-gradient(145deg,rgba(233,185,92,.10),rgba(8,19,25,.82))}
+.opsRoute{font-size:clamp(30px,5vw,54px);color:var(--gold);letter-spacing:.08em;margin:8px 0}
+.opsGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:12px}
+.opsStat{padding:12px;border:1px solid var(--line);border-radius:13px;background:rgba(5,13,17,.72)}
+.opsStatValue{font-size:18px;color:var(--teal);margin-top:5px}
+.opsCountdown{font-size:40px;color:var(--gold);line-height:1}
+.opsForm{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.opsForm .field.full{grid-column:1/-1}
+.opsStatus{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px;border:1px solid var(--gold);border-radius:14px;margin-top:12px}
+.opsStatus.ready{border-color:var(--good);color:var(--good);box-shadow:0 0 20px rgba(85,214,168,.14)}
+.opsToolbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+@media(max-width:850px){.flightOpsGrid,.opsForm{grid-template-columns:1fr}.opsForm .field.full{grid-column:auto}}
+
+
+.missionControl{display:grid;grid-template-columns:1.15fr .85fr;gap:14px;margin-bottom:14px}
+.missionCard{padding:17px;border:1px solid var(--line);border-radius:17px;background:rgba(8,19,25,.70)}
+.missionCard.primary{border-color:var(--modeAccent);background:linear-gradient(145deg,var(--modeGlow),rgba(8,19,25,.82))}
+.missionHeadline{font-size:clamp(24px,4vw,42px);margin:7px 0;color:var(--modeAccent)}
+.missionSub{font-size:14px;color:var(--muted);line-height:1.5}
+.briefingGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+.briefingStat{padding:12px;border:1px solid var(--line);border-radius:13px;background:rgba(5,13,17,.66)}
+.briefingValue{font-size:17px;color:var(--gold);margin-top:4px}
+.actionList{display:grid;gap:9px;margin-top:10px}
+.actionItem{display:grid;grid-template-columns:auto 1fr auto;gap:9px;align-items:center;padding:10px;border:1px solid var(--line);border-radius:12px;background:rgba(5,13,17,.62)}
+.actionTime{font-size:12px;color:var(--gold)}
+.syncBadge{display:inline-flex;align-items:center;gap:7px;padding:7px 10px;border:1px solid var(--teal);border-radius:999px;color:var(--teal);font-size:11px;letter-spacing:.08em}
+.emptyState{padding:16px;border:1px dashed var(--line);border-radius:14px;color:var(--muted);text-align:center}
+@media(max-width:900px){.missionControl{grid-template-columns:1fr}.briefingGrid{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.briefingGrid{grid-template-columns:1fr}}
+
+
+.memoryToolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.memoryStats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.memoryStat{padding:13px;border:1px solid var(--line);border-radius:14px;background:rgba(8,19,25,.68)}
+.memoryValue{font-size:25px;color:var(--gold);margin-top:5px}
+.memoryFilters{display:grid;grid-template-columns:1fr 180px;gap:10px;margin-bottom:14px}
+.memoryList{display:grid;gap:10px}
+.memoryItem{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:start;padding:14px;border:1px solid var(--line);border-radius:15px;background:rgba(8,19,25,.68)}
+.memoryIcon{font-size:24px}.memoryTitle{font-size:17px;font-weight:700}
+.memoryMeta{font-size:12px;color:var(--muted);margin-top:5px;line-height:1.45}
+.memoryButtons{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.miniBtn{border:1px solid var(--line);background:transparent;color:var(--text);padding:7px 9px;border-radius:9px;cursor:pointer;font-size:12px}
+.miniBtn:hover{border-color:var(--teal);color:var(--teal)}
+.miniBtn.danger{color:var(--danger);border-color:rgba(255,140,105,.45)}
+.editBanner{display:none;padding:11px;border:1px solid var(--gold);border-radius:12px;color:var(--gold);margin-bottom:12px}
+.editBanner.show{display:block}
+.fileInput{display:none}
+@media(max-width:760px){.memoryStats{grid-template-columns:1fr 1fr}.memoryFilters{grid-template-columns:1fr}.memoryItem{grid-template-columns:auto 1fr}.memoryButtons{grid-column:1/-1;justify-content:flex-start}}
+
+
+.dispatchGrid{display:grid;grid-template-columns:1.2fr .8fr;gap:14px}
+.dispatchHero{padding:18px;border:1px solid var(--gold);border-radius:18px;background:linear-gradient(145deg,rgba(233,185,92,.12),rgba(8,19,25,.82))}
+.dispatchRoute{font-size:clamp(34px,6vw,62px);color:var(--gold);letter-spacing:.09em;margin:8px 0}
+.dispatchState{font-size:13px;letter-spacing:.14em;color:var(--teal);text-transform:uppercase}
+.dispatchStats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+.dispatchStat{padding:12px;border:1px solid var(--line);border-radius:13px;background:rgba(5,13,17,.72)}
+.dispatchValue{font-size:18px;color:var(--teal);margin-top:5px}
+.dispatchAdvice{display:grid;gap:10px}
+.adviceCard{padding:14px;border:1px solid var(--line);border-radius:14px;background:rgba(8,19,25,.68)}
+.adviceCard strong{display:block;color:var(--gold);margin-bottom:5px}
+.dispatchSettings{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:14px}
+.phaseStrip{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin-top:14px}
+.phaseStep{padding:10px 7px;text-align:center;border:1px solid var(--line);border-radius:11px;color:var(--muted);font-size:11px}
+.phaseStep.active{border-color:var(--teal);color:var(--teal);background:rgba(53,224,208,.08);box-shadow:0 0 15px rgba(53,224,208,.12)}
+.brainLog{display:grid;gap:8px;margin-top:12px}
+.brainLogItem{display:grid;grid-template-columns:auto 1fr;gap:9px;padding:10px;border-left:2px solid var(--modeAccent);background:rgba(8,19,25,.5)}
+@media(max-width:900px){.dispatchGrid{grid-template-columns:1fr}.dispatchStats{grid-template-columns:1fr 1fr}.phaseStrip{grid-template-columns:1fr}}
+@media(max-width:560px){.dispatchStats,.dispatchSettings{grid-template-columns:1fr}}
+
+
+.opsBrainGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.opsBrainCard{padding:14px;border:1px solid var(--line);border-radius:15px;background:rgba(8,19,25,.68)}
+.opsBrainValue{font-size:23px;color:var(--gold);margin-top:6px}
+.alertStack{display:grid;gap:9px}
+.alertItem{padding:12px;border:1px solid var(--line);border-radius:13px;background:rgba(8,19,25,.64)}
+.alertItem.urgent{border-color:var(--danger);box-shadow:0 0 16px rgba(255,140,105,.10)}
+.alertItem.attention{border-color:var(--gold)}
+.alertTitle{font-weight:700}.alertNote{font-size:12px;color:var(--muted);margin-top:4px}
+.quickActions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+@media(max-width:850px){.opsBrainGrid{grid-template-columns:1fr 1fr}}
+@media(max-width:520px){.opsBrainGrid{grid-template-columns:1fr}}
+
+
+.copilotHero{padding:20px;border:1px solid var(--teal);border-radius:20px;background:linear-gradient(145deg,rgba(53,224,208,.10),rgba(8,19,25,.88));margin-bottom:14px}
+.copilotGreeting{font-size:clamp(30px,5vw,54px);color:var(--teal);margin:8px 0}
+.copilotSummary{font-size:16px;line-height:1.6;color:var(--text);max-width:900px}
+.copilotGrid{display:grid;grid-template-columns:1.2fr .8fr;gap:14px}
+.copilotCard{padding:16px;border:1px solid var(--line);border-radius:16px;background:rgba(8,19,25,.68)}
+.copilotPriority{font-size:24px;color:var(--gold);margin:7px 0}
+.copilotList{display:grid;gap:9px;margin-top:10px}
+.copilotItem{display:grid;grid-template-columns:auto 1fr auto;gap:9px;align-items:center;padding:11px;border:1px solid var(--line);border-radius:12px}
+.scoreRing{width:150px;height:150px;border-radius:50%;display:grid;place-items:center;margin:auto;background:conic-gradient(var(--teal) calc(var(--score)*1%),rgba(29,58,66,.5) 0)}
+.scoreInner{width:118px;height:118px;border-radius:50%;display:grid;place-items:center;background:#07151b;text-align:center}
+.scoreNumber{font-size:34px;color:var(--gold)}
+@media(max-width:900px){.copilotGrid{grid-template-columns:1fr}}
+
+
+.neuralCore{padding:20px;border:1px solid var(--teal);border-radius:20px;background:linear-gradient(145deg,rgba(53,224,208,.09),rgba(8,19,25,.90));margin-bottom:14px}
+.neuralHeader{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
+.neuralTitle{font-size:clamp(28px,5vw,50px);color:var(--teal);margin:6px 0}
+.neuralGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}
+.neuralCard{padding:13px;border:1px solid var(--line);border-radius:14px;background:rgba(5,13,17,.72)}
+.neuralValue{font-size:20px;color:var(--gold);margin-top:5px}
+.signalGrid{display:grid;grid-template-columns:1.15fr .85fr;gap:14px;margin-top:14px}
+.signalFlow{display:grid;gap:9px}
+.signalNode{display:grid;grid-template-columns:auto 1fr auto;gap:9px;align-items:center;padding:11px;border:1px solid var(--line);border-radius:12px;background:rgba(8,19,25,.66)}
+.signalNode.active{border-color:var(--teal);box-shadow:0 0 15px rgba(53,224,208,.11)}
+.signalStatus{font-size:11px;color:var(--muted)}
+.coreDecision{padding:16px;border:1px solid var(--gold);border-radius:15px;background:rgba(233,185,92,.06)}
+.coreDecisionTitle{font-size:22px;color:var(--gold);margin:6px 0}
+.coreButtonRow{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+@media(max-width:900px){.neuralGrid{grid-template-columns:1fr 1fr}.signalGrid{grid-template-columns:1fr}}
+@media(max-width:520px){.neuralGrid{grid-template-columns:1fr}}
+
+
+.chronosClock{display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center;padding:18px;border:1px solid var(--teal);border-radius:18px;background:linear-gradient(145deg,rgba(53,224,208,.08),rgba(8,19,25,.88));margin-bottom:14px}
+.clockTime{font-size:clamp(42px,8vw,78px);line-height:1;color:var(--teal);letter-spacing:.03em}
+.clockDate{font-size:15px;color:var(--muted);margin-top:8px}
+.clockZone{font-size:12px;color:var(--gold);letter-spacing:.12em;text-transform:uppercase;margin-top:6px}
+.clockSide{min-width:260px;padding:14px;border:1px solid var(--line);border-radius:14px;background:rgba(5,13,17,.70)}
+.countdownLabel{font-size:11px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase}
+.countdownValue{font-size:34px;color:var(--gold);margin-top:6px}
+.timerGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}
+.timerCard{padding:13px;border:1px solid var(--line);border-radius:14px;background:rgba(8,19,25,.66)}
+.timerValue{font-size:22px;color:var(--teal);margin-top:5px}
+.pacingBar{height:8px;border-radius:999px;background:rgba(29,58,66,.5);overflow:hidden;margin-top:9px}
+.pacingFill{height:100%;background:linear-gradient(90deg,var(--teal),var(--gold));width:0%}
+.phasePulse{display:inline-flex;align-items:center;gap:8px;padding:8px 11px;border:1px solid var(--gold);border-radius:999px;color:var(--gold);font-size:11px;letter-spacing:.1em}
+.phasePulse::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--gold);box-shadow:0 0 12px var(--gold)}
+.chronosList{display:grid;gap:9px;margin-top:12px}
+.chronosItem{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:11px;border:1px solid var(--line);border-radius:12px;background:rgba(5,13,17,.64)}
+.chronosWhen{font-size:12px;color:var(--gold)}
+@media(max-width:900px){.chronosClock{grid-template-columns:1fr}.clockSide{min-width:0}.timerGrid{grid-template-columns:1fr 1fr}}
+@media(max-width:520px){.timerGrid{grid-template-columns:1fr}}
+
+
+.intelligenceHero{padding:20px;border:1px solid var(--gold);border-radius:20px;background:linear-gradient(145deg,rgba(233,185,92,.10),rgba(8,19,25,.90));margin-bottom:14px}
+.intelligenceGreeting{font-size:clamp(28px,5vw,50px);color:var(--gold);margin:8px 0}
+.intelligenceBrief{font-size:16px;line-height:1.65;max-width:920px;color:var(--text)}
+.intelligenceGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}
+.intelligenceCard{padding:13px;border:1px solid var(--line);border-radius:14px;background:rgba(5,13,17,.72)}
+.intelligenceValue{font-size:21px;color:var(--teal);margin-top:5px}
+.planGrid{display:grid;grid-template-columns:1.1fr .9fr;gap:14px;margin-top:14px}
+.planStack{display:grid;gap:9px}
+.planItem{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:12px;border:1px solid var(--line);border-radius:13px;background:rgba(8,19,25,.66)}
+.planTime{font-size:13px;color:var(--gold);font-weight:700}
+.riskCard{padding:15px;border:1px solid var(--line);border-radius:15px;background:rgba(8,19,25,.68)}
+.riskItem{padding:10px 0;border-bottom:1px solid var(--line)}
+.riskItem:last-child{border-bottom:0}
+.riskTitle{font-weight:700}.riskNote{font-size:12px;color:var(--muted);margin-top:4px}
+.intelligenceSettings{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
+@media(max-width:900px){.intelligenceGrid{grid-template-columns:1fr 1fr}.planGrid{grid-template-columns:1fr}.intelligenceSettings{grid-template-columns:1fr 1fr}}
+@media(max-width:540px){.intelligenceGrid,.intelligenceSettings{grid-template-columns:1fr}}
+
+
+.predictiveHero{padding:20px;border:1px solid var(--teal);border-radius:20px;background:linear-gradient(145deg,rgba(53,224,208,.10),rgba(8,19,25,.92));margin-bottom:14px}
+.predictiveHeadline{font-size:clamp(28px,5vw,50px);color:var(--teal);margin:8px 0}
+.predictiveSummary{font-size:16px;line-height:1.65;max-width:940px}
+.forecastGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}
+.forecastCard{padding:14px;border:1px solid var(--line);border-radius:15px;background:rgba(5,13,17,.72)}
+.forecastValue{font-size:22px;color:var(--gold);margin-top:5px}
+.directorGrid{display:grid;grid-template-columns:1.1fr .9fr;gap:14px;margin-top:14px}
+.predictionStack{display:grid;gap:9px}
+.predictionItem{padding:13px;border:1px solid var(--line);border-radius:13px;background:rgba(8,19,25,.68)}
+.predictionItem.high{border-color:var(--danger)}
+.predictionItem.medium{border-color:var(--gold)}
+.predictionTitle{font-weight:700}
+.predictionNote{font-size:12px;color:var(--muted);margin-top:5px;line-height:1.5}
+.confidence{font-size:11px;color:var(--teal);margin-top:7px;letter-spacing:.08em}
+.patternGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin-top:10px}
+.patternCard{padding:12px;border:1px solid var(--line);border-radius:12px;background:rgba(5,13,17,.64)}
+.patternValue{font-size:20px;color:var(--teal);margin-top:4px}
+.directorAction{padding:16px;border:1px solid var(--gold);border-radius:15px;background:rgba(233,185,92,.07);margin-top:14px}
+.directorActionTitle{font-size:23px;color:var(--gold);margin:6px 0}
+.learningControls{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+@media(max-width:900px){.forecastGrid{grid-template-columns:1fr 1fr}.directorGrid{grid-template-columns:1fr}}
+@media(max-width:520px){.forecastGrid,.patternGrid{grid-template-columns:1fr}}
+
+
+.genesisHero{padding:22px;border:1px solid var(--gold);border-radius:22px;background:
+ radial-gradient(circle at 85% 10%,rgba(53,224,208,.13),transparent 32%),
+ linear-gradient(145deg,rgba(233,185,92,.10),rgba(8,19,25,.94));margin-bottom:14px}
+.genesisMark{display:inline-flex;align-items:center;gap:9px;padding:8px 12px;border:1px solid var(--teal);border-radius:999px;color:var(--teal);font-size:11px;letter-spacing:.12em}
+.genesisMark::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--teal);box-shadow:0 0 14px var(--teal)}
+.genesisGreeting{font-size:clamp(32px,6vw,58px);line-height:1.05;color:var(--gold);margin:12px 0}
+.genesisBrief{font-size:17px;line-height:1.7;max-width:980px;color:var(--text)}
+.genesisMetrics{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:16px}
+.genesisMetric{padding:14px;border:1px solid var(--line);border-radius:15px;background:rgba(5,13,17,.73)}
+.genesisValue{font-size:22px;color:var(--teal);margin-top:5px}
+.commandGrid{display:grid;grid-template-columns:1.15fr .85fr;gap:14px;margin-top:14px}
+.commandCard{padding:17px;border:1px solid var(--line);border-radius:17px;background:rgba(8,19,25,.70)}
+.commandPriority{font-size:27px;color:var(--gold);margin:8px 0}
+.executiveStack{display:grid;gap:9px;margin-top:12px}
+.executiveItem{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:12px;border:1px solid var(--line);border-radius:13px;background:rgba(5,13,17,.67)}
+.executiveItem.critical{border-color:var(--danger)}
+.executiveItem.attention{border-color:var(--gold)}
+.executiveMeta{font-size:11px;color:var(--muted);text-align:right}
+.systemMap{display:grid;gap:9px;margin-top:12px}
+.systemLine{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:11px;border:1px solid var(--line);border-radius:12px}
+.systemLine.online{border-color:rgba(53,224,208,.55)}
+.systemState{font-size:11px;color:var(--teal)}
+.chiefAction{padding:17px;border:1px solid var(--gold);border-radius:16px;background:rgba(233,185,92,.07);margin-top:14px}
+.chiefActionTitle{font-size:24px;color:var(--gold);margin:7px 0}
+.genesisButtons{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}
+@media(max-width:1000px){.genesisMetrics{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:850px){.commandGrid{grid-template-columns:1fr}.genesisMetrics{grid-template-columns:1fr 1fr}}
+@media(max-width:520px){.genesisMetrics{grid-template-columns:1fr}}
+
+
+.dragonflyMark{position:relative;width:48px;height:48px}
+.dragonflyBody{position:absolute;left:22px;top:8px;width:4px;height:33px;border-radius:999px;background:var(--gold);box-shadow:0 0 10px rgba(233,185,92,.35)}
+.dragonflyBody::before{content:"";position:absolute;left:-3px;top:-5px;width:10px;height:10px;border-radius:50%;background:var(--teal);box-shadow:0 0 10px rgba(53,224,208,.45)}
+.dragonflyBody::after{content:"";position:absolute;left:-2px;bottom:-4px;width:8px;height:8px;border-left:2px solid var(--gold);border-bottom:2px solid var(--gold);transform:rotate(-45deg)}
+.dragonflyWing{position:absolute;width:21px;height:12px;border:2px solid var(--teal);border-radius:70% 30% 70% 30%;opacity:.95;box-shadow:0 0 10px rgba(53,224,208,.20)}
+.dragonflyWing.w1{left:1px;top:12px;transform:rotate(18deg)}
+.dragonflyWing.w2{right:1px;top:12px;transform:scaleX(-1) rotate(18deg)}
+.dragonflyWing.w3{left:4px;top:27px;transform:rotate(-18deg) scale(.86)}
+.dragonflyWing.w4{right:4px;top:27px;transform:scaleX(-1) rotate(-18deg) scale(.86)}
+.headerClockWrap{min-width:265px}
+.clock.live{ text-shadow:0 0 18px rgba(53,224,208,.22)}
+@media(max-width:950px){.headerClockWrap{min-width:0}}
+
+@media(max-width:950px){.shell{grid-template-columns:1fr}.sidebar{position:static}.layout,.focus{grid-template-columns:1fr}.status{grid-template-columns:1fr 1fr}.instruments{grid-template-columns:1fr 1fr}.clock,.date,.aircraft{text-align:left}.header{grid-template-columns:1fr}}
+@media(max-width:560px){.status,.instruments,.checkGrid{grid-template-columns:1fr}.app{padding:10px 10px 28px}.header{padding:16px}.emblem{width:58px;height:58px;font-size:27px}.panel,.tile{padding:14px}}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="header glass">
+  <div class="brand">
+    <div class="emblem" aria-label="Dragonfly">
+      <div class="dragonflyMark" aria-hidden="true">
+        <span class="dragonflyWing w1"></span><span class="dragonflyWing w2"></span>
+        <span class="dragonflyWing w3"></span><span class="dragonflyWing w4"></span>
+        <span class="dragonflyBody"></span>
+      </div>
+    </div>
+    <div>
+  <div style="font-size:12px;letter-spacing:.22em;color:var(--teal);margin-bottom:7px">REN OS</div>
+  <h1>DRAGONFLY<br>DAILY FLIGHT PLAN</h1>
+  <div class="tag">One day. One mission. One intentional life.</div>
+</div>
+  </div>
+  <div class="headerClockWrap"><div id="clock" class="clock live">--:--:--</div><div id="date" class="date">Loading local date…</div><div class="aircraft">AIRCRAFT DFP-001 · CAPTAIN REN</div></div>
+</header>
+
+<section class="status">
+  <div class="tile glass"><div class="eyebrow">Flight Status</div><div id="flightStatus" class="value">ON COURSE ●</div></div>
+  <div class="tile glass"><div class="eyebrow">Operating Mode</div><div id="modeTop" class="value gold">HOME MODE</div></div>
+  <div class="tile glass"><div class="eyebrow">Current Phase</div><div id="phaseTop" class="value">PREFLIGHT</div></div>
+  <div class="tile glass"><div class="eyebrow">Water</div><div id="waterTop" class="value">0 / 128 oz</div></div>
+  <div class="tile glass"><div class="eyebrow">Protein</div><div id="proteinTop" class="value gold">0 / 170 g</div></div>
+</section>
+
+<div class="shell">
+<aside class="sidebar glass">
+  <div class="sideLabel">Flight Modes</div>
+  <div class="modeSwitcher" role="radiogroup" aria-label="Flight modes">
+    <button class="modeBtn" data-mode="home" role="radio" aria-checked="false">
+      <span class="navIcon">🏡</span>
+      <span class="modeCopy"><span class="modeName">Home</span><span class="modeDesc">Bliss, wellness, projects</span></span>
+      <span class="modeIndicator"></span>
+    </button>
+    <button class="modeBtn" data-mode="flight" role="radio" aria-checked="false">
+      <span class="navIcon">✈️</span>
+      <span class="modeCopy"><span class="modeName">Flight Attendant</span><span class="modeDesc">Preflight, crew, layover</span></span>
+      <span class="modeIndicator"></span>
+    </button>
+    <button class="modeBtn turbulence" data-mode="turbulence" role="radio" aria-checked="false">
+      <span class="navIcon">🌪</span>
+      <span class="modeCopy"><span class="modeName">Turbulence</span><span class="modeDesc">Stabilize without guilt</span></span>
+      <span class="modeIndicator"></span>
+    </button>
+  </div>
+  <div class="sideLabel">Navigation</div>
+  <button class="navBtn active" data-target="missionControlPanel"><span class="navIcon">⌂</span><span>Mission Control</span></button>
+  <button class="navBtn" data-target="dashboard"><span class="navIcon">◎</span><span>Focus Panel</span></button>
+  <button class="navBtn" data-target="schedulePanel"><span class="navIcon">◷</span><span>Day at a Glance</span></button>
+  <button class="navBtn" data-target="timelinePanel"><span class="navIcon">⌛</span><span>Milestones</span></button>
+  <button class="navBtn" data-target="managerPanel"><span class="navIcon">＋</span><span>Schedule Manager</span></button>
+  <button class="navBtn" data-target="flightOpsPanel"><span class="navIcon">🛫</span><span>Flight Operations</span></button>
+  <button class="navBtn" data-target="memoryPanel"><span class="navIcon">🧠</span><span>Memory Engine</span></button>
+  <button class="navBtn" data-target="dispatchPanel"><span class="navIcon">🛰️</span><span>Dispatch Brain</span></button>
+  <button class="navBtn" data-target="operationsBrainPanel"><span class="navIcon">⚙️</span><span>Operations Brain</span></button>
+  <button class="navBtn" data-target="copilotPanel"><span class="navIcon">🪷</span><span>Ren Copilot</span></button>
+  <button class="navBtn" data-target="neuralCorePanel"><span class="navIcon">🧬</span><span>Neural Core</span></button>
+  <button class="navBtn" data-target="chronosPanel"><span class="navIcon">⏱️</span><span>Chronos Engine</span></button>
+  <button class="navBtn" data-target="intelligencePanel"><span class="navIcon">🧠</span><span>Intelligence Layer</span></button>
+  <button class="navBtn" data-target="predictivePanel"><span class="navIcon">🔭</span><span>Predictive Director</span></button>
+  <button class="navBtn" data-target="genesisPanel"><span class="navIcon">✨</span><span>Genesis Command</span></button>
+</aside>
+
+<div>
+<div id="modeBanner" class="modeBanner glass">
+  <div><div class="eyebrow">Active Flight Mode</div><strong id="modeBannerTitle">HOME MODE</strong></div>
+  <div id="modeBannerNote" class="small">Dragonfly Bliss, wellness, photography, and home projects.</div>
+</div>
+<section id="missionControlPanel" class="missionControl">
+  <div class="missionCard primary glass">
+    <div class="syncBadge">● MODULES CONNECTED</div>
+    <div class="eyebrow" style="margin-top:14px">Ren OS Mission Briefing</div>
+    <div id="missionHeadline" class="missionHeadline">Preparing your day…</div>
+    <div id="missionSub" class="missionSub">Schedule, flight operations, wellness, and focus are syncing.</div>
+    <div class="briefingGrid">
+      <div class="briefingStat"><div class="eyebrow">Next Event</div><div id="briefNextEvent" class="briefingValue">—</div></div>
+      <div class="briefingStat"><div class="eyebrow">Time Remaining</div><div id="briefCountdown" class="briefingValue">—</div></div>
+      <div class="briefingStat"><div class="eyebrow">Readiness</div><div id="briefReadiness" class="briefingValue">0%</div></div>
+    </div>
+  </div>
+  <div class="missionCard glass">
+    <div class="eyebrow">Upcoming Actions</div>
+    <div id="missionActions" class="actionList"></div>
+  </div>
+</section>
+
+<main class="layout">
+  <section id="dashboard" class="panel glass">
+    <h2>Focus Panel</h2>
+    <div class="focus">
+      <div class="focusStack">
+        <div class="focusBlock current">
+          <div class="focusLabel">Current</div>
+          <div id="currentTitle" class="focusTitle">Morning Preflight</div>
+          <div id="currentTime" class="focusTime">3:00 AM – 6:00 AM</div>
+          <div id="currentNote" class="focusNote">Water, devotion, stretch, and orient the day.</div>
+        </div>
+        <div class="focusBlock">
+          <div class="focusLabel">Next</div>
+          <div id="nextTitle" class="focusTitle" style="font-size:23px">Departure</div>
+          <div id="nextFocusTime" class="focusTime">6:00 AM</div>
+          <div id="nextFocusNote" class="focusNote">Breakfast, bills, exercise, or first home priority.</div>
+        </div>
+        <div class="focusBlock">
+          <div class="focusLabel">Later Today</div>
+          <div id="laterList" class="laterList"></div>
+        </div>
+      </div>
+      <div class="ring" id="ring"><div class="ringInner"><div class="eyebrow">Mode Systems</div><div class="ringNum" id="ringNum">0/9</div><div class="small">complete</div></div></div>
+    </div>
+  </section>
+
+  <section id="timelinePanel" class="panel glass"><h2>Dynamic Timeline</h2><div id="timeline" class="timeline"></div></section>
+
+  <section id="homePanel" class="panel glass">
+    <h2>Home Mode Instruments</h2>
+    <div id="homeInstruments" class="instruments"></div>
+  </section>
+
+  <section id="flightPanel" class="panel glass hidden">
+    <h2>Preflight Checklist</h2>
+    <div id="flightChecklist" class="checkGrid"></div>
+    <div id="flightClearance" class="clearance">PREPARING FOR DEPARTURE</div>
+  </section>
+
+  <section id="turbulencePanel" class="panel glass turbulenceCard hidden">
+    <h2>Turbulence Protocol</h2>
+    <div class="modeMission">Stabilize. Nothing else is required today.</div>
+    <div id="turbulenceChecklist" class="checkGrid"></div>
+    <div id="turbulenceClearance" class="clearance">STABILIZING</div>
+  </section>
+
+  <section id="schedulePanel" class="panel glass">
+    <h2>Day at a Glance</h2>
+    <div id="scheduleList" class="scheduleList"></div>
+  </section>
+
+  <section id="trackerPanel" class="panel glass">
+    <h2>Water & Protein Command</h2>
+    <div class="tracker">
+      <div class="meter">
+        <div class="meterRow"><div><div class="eyebrow">Water Mission</div><div class="small">Target: one gallon</div></div><div id="waterValue" class="meterValue">0 oz</div></div>
+        <div class="progress"><div id="waterBar" class="bar"></div></div>
+        <div class="btnRow"><button class="btn primary" onclick="addWater(8)">+8 oz</button><button class="btn" onclick="addWater(12)">+12 oz</button><button class="btn" onclick="addWater(20)">+20 oz</button><button class="btn reset" onclick="resetWater()">Reset</button></div>
+      </div>
+      <div class="meter">
+        <div class="meterRow"><div><div class="eyebrow">Protein Mission</div><div class="small">Target: 170 grams</div></div><div id="proteinValue" class="meterValue">0 g</div></div>
+        <div class="progress"><div id="proteinBar" class="bar"></div></div>
+        <div class="btnRow"><button class="btn primary" onclick="addProtein(10)">+10 g</button><button class="btn" onclick="addProtein(20)">+20 g</button><button class="btn" onclick="addProtein(30)">+30 g</button><button class="btn reset" onclick="resetProtein()">Reset</button></div>
+      </div>
+    </div>
+  </section>
+  <section id="flightOpsPanel" class="panel glass hidden" style="margin-top:14px">
+    <h2>Flight Operations Center</h2>
+    <div class="flightOpsGrid">
+      <div class="opsCard opsHero">
+        <div class="eyebrow">Next Crew Assignment</div>
+        <div id="opsRoute" class="opsRoute">DAL → —</div>
+        <div id="opsTripTitle" class="modeMission">No trip briefing entered yet</div>
+        <div class="opsGrid">
+          <div class="opsStat"><div class="eyebrow">Report</div><div id="opsReport" class="opsStatValue">—</div></div>
+          <div class="opsStat"><div class="eyebrow">Flight</div><div id="opsFlightNo" class="opsStatValue">—</div></div>
+          <div class="opsStat"><div class="eyebrow">Gate</div><div id="opsGate" class="opsStatValue">—</div></div>
+          <div class="opsStat"><div class="eyebrow">Van</div><div id="opsVan" class="opsStatValue">—</div></div>
+          <div class="opsStat"><div class="eyebrow">Hotel</div><div id="opsHotel" class="opsStatValue">—</div></div>
+          <div class="opsStat"><div class="eyebrow">Layover</div><div id="opsLayover" class="opsStatValue">—</div></div>
+        </div>
+        <div class="opsStatus" id="opsStatus">
+          <div><div class="eyebrow">Operational Status</div><strong id="opsStatusText">PREPARING FOR DEPARTURE</strong></div>
+          <div><div class="eyebrow">Time to Report</div><div id="opsCountdown" class="opsCountdown">—</div></div>
+        </div>
+      </div>
+
+      <div class="opsCard">
+        <div class="eyebrow">Crew Trip Briefing</div>
+        <div class="opsForm" style="margin-top:12px">
+          <div class="field full"><label for="tripTitle">Trip Name</label><input id="tripTitle" placeholder="Example: DAL–LGA three-day"></div>
+          <div class="field"><label for="reportDate">Report Date & Time</label><input id="reportDate" type="datetime-local"></div>
+          <div class="field"><label for="flightNumber">Flight Number</label><input id="flightNumber" placeholder="WN 1486"></div>
+          <div class="field"><label for="origin">From</label><input id="origin" placeholder="DAL"></div>
+          <div class="field"><label for="destination">To</label><input id="destination" placeholder="LGA"></div>
+          <div class="field"><label for="gate">Gate</label><input id="gate" placeholder="15"></div>
+          <div class="field"><label for="vanTime">Van Time</label><input id="vanTime" placeholder="8:15 PM"></div>
+          <div class="field full"><label for="hotel">Hotel</label><input id="hotel" placeholder="Hotel name and address"></div>
+          <div class="field"><label for="layover">Layover</label><input id="layover" placeholder="22 hours"></div>
+          <div class="field"><label for="tripNotes">Notes</label><input id="tripNotes" placeholder="Crew, meal, or airport notes"></div>
+        </div>
+        <div class="opsToolbar">
+          <button class="btn primary" onclick="saveTripBriefing()">Save Trip Briefing</button>
+          <button class="btn reset" onclick="clearTripBriefing()">Clear</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="genesisPanel" class="panel glass" style="margin-top:14px">
+    <h2>Genesis Command</h2>
+
+    <div class="genesisHero">
+      <div class="genesisMark">GENESIS CORE ONLINE</div>
+      <div id="genesisGreeting" class="genesisGreeting">Good day, Captain Ren.</div>
+      <div id="genesisBrief" class="genesisBrief">The command layer is assembling your complete operating picture.</div>
+
+      <div class="genesisMetrics">
+        <div class="genesisMetric"><div class="eyebrow">Mission Health</div><div id="genesisHealth" class="genesisValue">0%</div></div>
+        <div class="genesisMetric"><div class="eyebrow">Next Transition</div><div id="genesisTransition" class="genesisValue">—</div></div>
+        <div class="genesisMetric"><div class="eyebrow">Active Mode</div><div id="genesisMode" class="genesisValue">Home</div></div>
+        <div class="genesisMetric"><div class="eyebrow">Open Missions</div><div id="genesisMissions" class="genesisValue">0</div></div>
+        <div class="genesisMetric"><div class="eyebrow">Risk</div><div id="genesisRisk" class="genesisValue">Low</div></div>
+      </div>
+    </div>
+
+    <div class="commandGrid">
+      <div class="commandCard">
+        <div class="eyebrow">Executive Briefing</div>
+        <div id="genesisPriority" class="commandPriority">Protect the next transition.</div>
+        <div id="genesisPriorityNote" class="small">Genesis is evaluating all active modules.</div>
+        <div id="genesisExecutiveStack" class="executiveStack"></div>
+
+        <div class="chiefAction">
+          <div class="eyebrow">Chief of Staff Recommendation</div>
+          <div id="chiefActionTitle" class="chiefActionTitle">Hold the current course.</div>
+          <div id="chiefActionNote" class="small">No intervention is required.</div>
+          <div class="genesisButtons">
+            <button class="btn primary" onclick="applyGenesisRecommendation()">Apply Recommendation</button>
+            <button class="btn" onclick="recordLearningSnapshot()">Record Snapshot</button>
+            <button class="btn" onclick="scrollToScheduleManager()">Add Mission</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="commandCard">
+        <div class="eyebrow">Unified System Map</div>
+        <div id="genesisSystemMap" class="systemMap"></div>
+
+        <div class="eyebrow" style="margin-top:18px">Genesis Interpretation</div>
+        <div id="genesisInterpretation" class="small" style="margin-top:8px;line-height:1.65">
+          The operating system is synchronizing.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="predictivePanel" class="panel glass" style="margin-top:14px">
+    <h2>Predictive Flight Director</h2>
+
+    <div class="predictiveHero">
+      <div class="syncBadge">● PREDICTIVE SYSTEM ONLINE</div>
+      <div id="predictiveHeadline" class="predictiveHeadline">Building your operational forecast…</div>
+      <div id="predictiveSummary" class="predictiveSummary">Ren OS is comparing timing, readiness, saved missions, and recent activity.</div>
+
+      <div class="forecastGrid">
+        <div class="forecastCard"><div class="eyebrow">Forecast Readiness</div><div id="forecastReadiness" class="forecastValue">0%</div></div>
+        <div class="forecastCard"><div class="eyebrow">Risk Level</div><div id="forecastRisk" class="forecastValue">Low</div></div>
+        <div class="forecastCard"><div class="eyebrow">Likely Mode</div><div id="forecastMode" class="forecastValue">Home</div></div>
+        <div class="forecastCard"><div class="eyebrow">Planning Horizon</div><div id="forecastHorizon" class="forecastValue">24 hr</div></div>
+      </div>
+    </div>
+
+    <div class="directorGrid">
+      <div class="opsCard">
+        <div class="eyebrow">Predictions</div>
+        <div id="predictionStack" class="predictionStack" style="margin-top:12px"></div>
+
+        <div class="directorAction">
+          <div class="eyebrow">Flight Director Recommendation</div>
+          <div id="directorActionTitle" class="directorActionTitle">Protect the next transition.</div>
+          <div id="directorActionNote" class="small">Ren OS is waiting for enough mission data to make a forecast.</div>
+          <div class="learningControls">
+            <button class="btn primary" onclick="applyDirectorRecommendation()">Apply Recommendation</button>
+            <button class="btn" onclick="recordLearningSnapshot()">Record Today’s Snapshot</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="opsCard">
+        <div class="eyebrow">Learned Patterns</div>
+        <div class="patternGrid">
+          <div class="patternCard"><div class="eyebrow">Snapshots</div><div id="patternSnapshots" class="patternValue">0</div></div>
+          <div class="patternCard"><div class="eyebrow">Avg. Water</div><div id="patternWater" class="patternValue">0 oz</div></div>
+          <div class="patternCard"><div class="eyebrow">Avg. Protein</div><div id="patternProtein" class="patternValue">0 g</div></div>
+          <div class="patternCard"><div class="eyebrow">Avg. Readiness</div><div id="patternReadiness" class="patternValue">0%</div></div>
+        </div>
+
+        <div class="eyebrow" style="margin-top:18px">Pattern Interpretation</div>
+        <div id="patternInterpretation" class="small" style="margin-top:8px;line-height:1.6">Learning begins when snapshots are recorded.</div>
+
+        <div class="learningControls">
+          <button class="btn" onclick="exportLearningData()">Export Learning Data</button>
+          <button class="btn reset" onclick="clearLearningData()">Clear Learning Data</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="intelligencePanel" class="panel glass" style="margin-top:14px">
+    <h2>Intelligence Layer</h2>
+
+    <div class="intelligenceHero">
+      <div class="syncBadge">● INTELLIGENCE ONLINE</div>
+      <div id="intelGreeting" class="intelligenceGreeting">Good day, Captain Ren.</div>
+      <div id="intelBrief" class="intelligenceBrief">Ren OS is calculating your operational plan.</div>
+
+      <div class="intelligenceGrid">
+        <div class="intelligenceCard"><div class="eyebrow">Wake Time</div><div id="intelWake" class="intelligenceValue">—</div></div>
+        <div class="intelligenceCard"><div class="eyebrow">Bedtime Target</div><div id="intelBedtime" class="intelligenceValue">—</div></div>
+        <div class="intelligenceCard"><div class="eyebrow">Leave Home</div><div id="intelLeave" class="intelligenceValue">—</div></div>
+        <div class="intelligenceCard"><div class="eyebrow">Mission Score</div><div id="intelScore" class="intelligenceValue">0%</div></div>
+      </div>
+    </div>
+
+    <div class="planGrid">
+      <div class="opsCard">
+        <div class="eyebrow">Generated Flight-Day Plan</div>
+        <div id="intelPlan" class="planStack" style="margin-top:12px"></div>
+      </div>
+
+      <div class="riskCard">
+        <div class="eyebrow">Operational Risks</div>
+        <div id="intelRisks" style="margin-top:10px"></div>
+
+        <div class="eyebrow" style="margin-top:18px">Planning Preferences</div>
+        <div class="intelligenceSettings">
+          <div class="field"><label for="sleepHours">Sleep Goal</label><input id="sleepHours" type="number" min="4" max="12" step=".5" value="8"></div>
+          <div class="field"><label for="wakeBuffer">Wake-to-Leave</label><input id="wakeBuffer" type="number" min="15" value="75"></div>
+          <div class="field"><label for="windDownMinutes">Wind-Down</label><input id="windDownMinutes" type="number" min="0" value="45"></div>
+        </div>
+        <div class="opsToolbar">
+          <button class="btn primary" onclick="saveIntelligenceSettings()">Save Intelligence Settings</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="chronosPanel" class="panel glass" style="margin-top:14px">
+    <h2>Chronos Engine</h2>
+
+    <div class="chronosClock">
+      <div>
+        <div class="phasePulse" id="chronosPhasePulse">LIVE SYSTEM TIME</div>
+        <div id="chronosTime" class="clockTime">--:--:--</div>
+        <div id="chronosDate" class="clockDate">Loading date…</div>
+        <div id="chronosZone" class="clockZone">Dallas Local Time</div>
+      </div>
+
+      <div class="clockSide">
+        <div class="countdownLabel">Next Transition</div>
+        <div id="chronosNextTitle" class="modeMission">Awaiting Mission Object</div>
+        <div id="chronosCountdown" class="countdownValue">—</div>
+        <div id="chronosNextNote" class="small">Add a flight, bill, payday, event, or milestone.</div>
+      </div>
+    </div>
+
+    <div class="timerGrid">
+      <div class="timerCard">
+        <div class="eyebrow">Current Phase</div>
+        <div id="chronosCurrentPhase" class="timerValue">Planning</div>
+      </div>
+      <div class="timerCard">
+        <div class="eyebrow">Leave Home</div>
+        <div id="chronosLeaveHome" class="timerValue">—</div>
+      </div>
+      <div class="timerCard">
+        <div class="eyebrow">Water Pace</div>
+        <div id="chronosWaterPace" class="timerValue">—</div>
+        <div class="pacingBar"><div id="chronosWaterFill" class="pacingFill"></div></div>
+      </div>
+      <div class="timerCard">
+        <div class="eyebrow">Protein Pace</div>
+        <div id="chronosProteinPace" class="timerValue">—</div>
+        <div class="pacingBar"><div id="chronosProteinFill" class="pacingFill"></div></div>
+      </div>
+    </div>
+
+    <div class="dispatchGrid" style="margin-top:14px">
+      <div class="opsCard">
+        <div class="eyebrow">Automatic Timeline</div>
+        <div id="chronosTimeline" class="chronosList"></div>
+      </div>
+      <div class="opsCard">
+        <div class="eyebrow">Time-Based Guidance</div>
+        <div id="chronosGuidance" class="small" style="margin-top:10px;line-height:1.6">Chronos is evaluating the day.</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="neuralCorePanel" class="panel glass" style="margin-top:14px">
+    <h2>Neural Core</h2>
+    <div class="neuralCore">
+      <div class="neuralHeader">
+        <div>
+          <div class="syncBadge">● CORE ONLINE</div>
+          <div id="neuralTitle" class="neuralTitle">Synchronizing Ren OS…</div>
+          <div id="neuralSummary" class="missionSub">The shared mission object is connecting every active module.</div>
+        </div>
+        <div class="scoreRing" id="coreScoreRing" style="--score:0;width:130px;height:130px">
+          <div class="scoreInner" style="width:100px;height:100px">
+            <div><div id="coreScore" class="scoreNumber">0%</div><div class="small">core health</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="neuralGrid">
+        <div class="neuralCard"><div class="eyebrow">Active Object</div><div id="coreObject" class="neuralValue">None</div></div>
+        <div class="neuralCard"><div class="eyebrow">Operating Mode</div><div id="coreMode" class="neuralValue">Home</div></div>
+        <div class="neuralCard"><div class="eyebrow">Current Phase</div><div id="corePhase" class="neuralValue">Planning</div></div>
+        <div class="neuralCard"><div class="eyebrow">Next Transition</div><div id="coreTransition" class="neuralValue">—</div></div>
+      </div>
+      <div class="signalGrid">
+        <div class="signalFlow" id="signalFlow"></div>
+        <div class="coreDecision">
+          <div class="eyebrow">Neural Decision</div>
+          <div id="coreDecisionTitle" class="coreDecisionTitle">Protect your margin.</div>
+          <div id="coreDecisionNote" class="small">Ren OS is waiting for the next Mission Object.</div>
+          <div class="coreButtonRow">
+            <button class="btn primary" onclick="applyCoreDecision()">Apply Recommendation</button>
+            <button class="btn" onclick="scrollToScheduleManager()">Add Mission Object</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="copilotPanel" class="panel glass" style="margin-top:14px">
+    <h2>Ren Copilot</h2>
+    <div class="copilotHero">
+      <div class="syncBadge">● COPILOT ONLINE</div>
+      <div id="copilotGreeting" class="copilotGreeting">Good morning, Ren.</div>
+      <div id="copilotSummary" class="copilotSummary">Ren OS is preparing your briefing.</div>
+    </div>
+
+    <div class="copilotGrid">
+      <div class="copilotCard">
+        <div class="eyebrow">Primary Mission</div>
+        <div id="copilotPriority" class="copilotPriority">Protect today’s margin.</div>
+        <div id="copilotReason" class="small">The Copilot is evaluating your current mode, next event, and readiness.</div>
+
+        <div class="eyebrow" style="margin-top:18px">Recommended Sequence</div>
+        <div id="copilotSequence" class="copilotList"></div>
+      </div>
+
+      <div class="copilotCard">
+        <div class="eyebrow" style="text-align:center">Mission Score</div>
+        <div id="copilotScoreRing" class="scoreRing" style="--score:0">
+          <div class="scoreInner">
+            <div><div id="copilotScore" class="scoreNumber">0%</div><div class="small">ready</div></div>
+          </div>
+        </div>
+        <div class="eyebrow" style="margin-top:18px">Copilot Note</div>
+        <div id="copilotNote" class="small" style="margin-top:8px;line-height:1.55">Start with the next right thing.</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="operationsBrainPanel" class="panel glass" style="margin-top:14px">
+    <h2>Operations Brain</h2>
+    <div class="managerNotice">A single operational layer now watches readiness, upcoming Mission Objects, flight timing, and financial attention points.</div>
+
+    <div class="opsBrainGrid">
+      <div class="opsBrainCard"><div class="eyebrow">System Readiness</div><div id="opsBrainReadiness" class="opsBrainValue">0%</div></div>
+      <div class="opsBrainCard"><div class="eyebrow">Next Flight</div><div id="opsBrainFlight" class="opsBrainValue">—</div></div>
+      <div class="opsBrainCard"><div class="eyebrow">Financial Alerts</div><div id="opsBrainFinance" class="opsBrainValue">0</div></div>
+      <div class="opsBrainCard"><div class="eyebrow">Open Objects</div><div id="opsBrainObjects" class="opsBrainValue">0</div></div>
+    </div>
+
+    <div class="dispatchGrid">
+      <div class="opsCard">
+        <div class="eyebrow">Attention Queue</div>
+        <div id="operationsAlerts" class="alertStack" style="margin-top:12px"></div>
+      </div>
+      <div class="opsCard">
+        <div class="eyebrow">Quick Actions</div>
+        <div class="quickActions">
+          <button class="btn primary" onclick="setMode('home')">Activate Home</button>
+          <button class="btn primary" onclick="setMode('flight')">Activate Flight</button>
+          <button class="btn reset" onclick="setMode('turbulence')">Activate Turbulence</button>
+          <button class="btn" onclick="scrollToScheduleManager()">Add Mission Object</button>
+        </div>
+        <div class="eyebrow" style="margin-top:18px">System Interpretation</div>
+        <div id="operationsInterpretation" class="small" style="margin-top:8px;line-height:1.55">Ren OS is evaluating your operating picture.</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="dispatchPanel" class="panel glass" style="margin-top:14px">
+    <h2>Dispatch Brain</h2>
+    <div class="managerNotice">Ren OS now interprets your next flight, calculates your departure window, selects the operating mode, and builds a live briefing.</div>
+
+    <div class="dispatchGrid">
+      <div class="dispatchHero">
+        <div id="dispatchState" class="dispatchState">Awaiting assignment</div>
+        <div id="dispatchRoute" class="dispatchRoute">DAL → —</div>
+        <div id="dispatchTitle" class="modeMission">Add a flight Mission Object to activate Dispatch.</div>
+
+        <div class="dispatchStats">
+          <div class="dispatchStat"><div class="eyebrow">Report</div><div id="dispatchReport" class="dispatchValue">—</div></div>
+          <div class="dispatchStat"><div class="eyebrow">Leave Home</div><div id="dispatchLeave" class="dispatchValue">—</div></div>
+          <div class="dispatchStat"><div class="eyebrow">Countdown</div><div id="dispatchCountdown" class="dispatchValue">—</div></div>
+          <div class="dispatchStat"><div class="eyebrow">Readiness</div><div id="dispatchReady" class="dispatchValue">0%</div></div>
+          <div class="dispatchStat"><div class="eyebrow">Water Before Report</div><div id="dispatchWater" class="dispatchValue">64 oz</div></div>
+          <div class="dispatchStat"><div class="eyebrow">Protein Before Report</div><div id="dispatchProtein" class="dispatchValue">30 g</div></div>
+        </div>
+
+        <div class="phaseStrip">
+          <div class="phaseStep" data-dispatch-phase="planning">Planning</div>
+          <div class="phaseStep" data-dispatch-phase="preflight">Preflight</div>
+          <div class="phaseStep" data-dispatch-phase="departure">Departure</div>
+          <div class="phaseStep" data-dispatch-phase="duty">Duty</div>
+          <div class="phaseStep" data-dispatch-phase="recovery">Recovery</div>
+        </div>
+      </div>
+
+      <div class="dispatchAdvice">
+        <div class="adviceCard">
+          <strong>Recommended Action</strong>
+          <div id="dispatchAction" class="small">Enter your next trip in Flight Operations or the Schedule Manager.</div>
+        </div>
+        <div class="adviceCard">
+          <strong>Operational Settings</strong>
+          <div class="dispatchSettings">
+            <div class="field"><label for="driveMinutes">Drive to Airport</label><input id="driveMinutes" type="number" min="0" value="30"></div>
+            <div class="field"><label for="airportBuffer">Airport Buffer</label><input id="airportBuffer" type="number" min="0" value="45"></div>
+            <div class="field"><label for="prepMinutes">Home Prep Buffer</label><input id="prepMinutes" type="number" min="0" value="30"></div>
+            <div class="field"><label for="recoveryHours">Recovery Window</label><input id="recoveryHours" type="number" min="1" value="12"></div>
+          </div>
+          <div class="opsToolbar">
+            <button class="btn primary" onclick="saveDispatchSettings()">Save Dispatch Settings</button>
+          </div>
+        </div>
+        <div class="adviceCard">
+          <strong>Brain Log</strong>
+          <div id="brainLog" class="brainLog"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="memoryPanel" class="panel glass" style="margin-top:14px">
+    <h2>Memory Engine</h2>
+    <div class="managerNotice">Every Mission Object lives here. Search it, edit it, duplicate it, remove it, or export a backup.</div>
+
+    <div class="memoryStats">
+      <div class="memoryStat"><div class="eyebrow">All Objects</div><div id="memoryTotal" class="memoryValue">0</div></div>
+      <div class="memoryStat"><div class="eyebrow">Flights</div><div id="memoryFlights" class="memoryValue">0</div></div>
+      <div class="memoryStat"><div class="eyebrow">Financial</div><div id="memoryFinance" class="memoryValue">0</div></div>
+      <div class="memoryStat"><div class="eyebrow">Upcoming</div><div id="memoryUpcoming" class="memoryValue">0</div></div>
+    </div>
+
+    <div class="memoryToolbar">
+      <button class="btn primary" onclick="scrollToScheduleManager()">＋ New Mission Object</button>
+      <button class="btn" onclick="exportRenOS()">Export Backup</button>
+      <button class="btn" onclick="document.getElementById('importFile').click()">Import Backup</button>
+      <input id="importFile" class="fileInput" type="file" accept=".json,application/json" onchange="importRenOS(event)">
+    </div>
+
+    <div class="memoryFilters">
+      <input id="memorySearch" type="search" placeholder="Search flights, bills, paydays, events…" oninput="renderMemoryEngine()">
+      <select id="memoryTypeFilter" onchange="renderMemoryEngine()">
+        <option value="all">All types</option>
+        <option value="flight">Flights</option>
+        <option value="bill">Bills</option>
+        <option value="payday">Paydays</option>
+        <option value="event">Events</option>
+        <option value="milestone">Milestones</option>
+      </select>
+    </div>
+
+    <div id="memoryList" class="memoryList"></div>
+  </section>
+
+  <section id="managerPanel" class="panel glass" style="margin-top:14px">
+    <h2>Schedule Manager</h2>
+    <div id="editBanner" class="editBanner">Editing an existing Mission Object. Save to update every Ren OS module.</div>
+    <div class="managerNotice">Create one Mission Object here. Mission Control, the Dynamic Timeline, Flight Operations, and the Memory Engine will all read it.</div>
+    <div class="managerGrid">
+      <div class="field">
+        <label for="itemType">Type</label>
+        <select id="itemType">
+          <option value="flight">✈️ Flight / Work Trip</option>
+          <option value="bill">💳 Bill Due</option>
+          <option value="payday">💰 Payday</option>
+          <option value="event">📅 Event</option>
+          <option value="milestone">🏁 Milestone</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="itemDate">Date and Time</label>
+        <input id="itemDate" type="datetime-local">
+      </div>
+      <div class="field">
+        <label for="itemRepeat">Repeat</label>
+        <select id="itemRepeat">
+          <option value="none">Does not repeat</option>
+          <option value="weekly">Every week</option>
+          <option value="biweekly">Every 2 weeks</option>
+          <option value="monthly">Every month</option>
+          <option value="yearly">Every year</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="itemAmount">Amount / Value</label>
+        <input id="itemAmount" type="text" placeholder="$0.00 or optional value">
+      </div>
+      <div class="field full">
+        <label for="itemTitle">Title</label>
+        <input id="itemTitle" type="text" placeholder="Example: DAL report — Flight 123 to LGA">
+      </div>
+      <div class="field full">
+        <label for="itemDetails">Details</label>
+        <textarea id="itemDetails" placeholder="Report time, airport, hotel, van, amount due, confirmation number, or any notes"></textarea>
+      </div>
+    </div>
+    <div class="managerActions">
+      <button id="saveItemBtn" class="btn primary" onclick="addScheduleItem()">Add to Ren OS</button>
+      <button class="btn reset" onclick="clearScheduleForm()">Clear</button>
+    </div>
+    <div class="sideLabel" style="margin-top:22px">Your Added Items</div>
+    <div id="savedItems" class="savedList"></div>
+  </section>
+</main>
+
+<section class="footer glass">The goal isn't to do everything.<br>The goal is to move the life I'm building forward today.</section>
+</div>
+</div>
+</div>
+
+<script>
+const dayKey='dfp-'+new Date().toLocaleDateString('en-CA');
+const defaultState={mode:'home',water:0,protein:0,home:{},flight:{},turbulence:{}};
+let savedDay={};
+try{savedDay=JSON.parse(localStorage.getItem(dayKey)||'{}')||{}}catch(e){savedDay={}}
+const state=Object.assign({},defaultState,savedDay);
+state.home=state.home||{};state.flight=state.flight||{};state.turbulence=state.turbulence||{};
+
+const homeItems=[
+ ['stretch','🧘','Stretch','Minimum win: 3 minutes'],
+ ['exercise','🏋🏾','Exercise','Minimum win: 10 minutes'],
+ ['photo','📷','Take one photo','Capture one mood'],
+ ['devotion','🙏','Devotion','Start centered'],
+ ['read','📖','Read 20 minutes','A few pages count'],
+ ['sunshine','☀️','Sunshine','10 minutes outside'],
+ ['bills','💰','Bills & due dates','Quick daily review'],
+ ['garden','🌿','Dragonfly Bliss','Move one project forward'],
+ ['meal','🍽️','Meal preparation','Fuel future Ren']
+];
+const flightItems=[
+ ['uniform','Uniform ready'],['badge','Crew badge and ID'],['food','Food bag packed'],
+ ['camera','Camera and batteries'],['chargers','Chargers packed'],['passport','Passport if needed'],
+ ['waterBottle','Water bottle'],['compression','Compression socks'],['vitamins','Vitamins and medications'],
+ ['workout','Workout clothes'],['hotel','Hotel essentials']
+];
+const turbulenceItems=[
+ ['hydrate','Drink water'],['eat','Eat something nourishing'],['stretch','Stretch 3 minutes'],
+ ['shower','Shower or wash face'],['outside','Five minutes outside'],['text','Text one person']
+];
+const defaultEvents=[
+ {id:'vacation',title:'Vacation',date:'2026-08-01T12:00',type:'event',icon:'🌴',details:'Protected time'},
+ {id:'aflcio',title:'Texas AFL-CIO Scholarship Committee Meeting',date:'2026-08-11T09:00',type:'event',icon:'🎓',details:'9:00 AM'},
+ {id:'lga',title:'Van to LGA – Pratt Institute – Brooklyn',date:'2026-08-18T12:00',type:'flight',icon:'🛫',details:'Travel waypoint'},
+ {id:'cadillac',title:'Cadillac Paid Off',date:'2026-09-20T12:00',type:'milestone',icon:'🚗',details:'Financial milestone'},
+ {id:'wedding',title:'Tye Shirley Wedding',date:'2026-12-03T12:00',type:'event',icon:'💍',details:'Celebration'}
+];
+const scheduleKey='ren-os-schedule-items';
+let customEvents=[];
+try{customEvents=JSON.parse(localStorage.getItem(scheduleKey)||'[]')||[]}catch(e){customEvents=[]}
+const tripKey='ren-os-current-trip';
+let currentTrip={};
+try{currentTrip=JSON.parse(localStorage.getItem(tripKey)||'{}')||{}}catch(e){currentTrip={}}
+
+const typeMeta={
+ flight:{icon:'✈️',label:'Flight / Work Trip'},
+ bill:{icon:'💳',label:'Bill Due'},
+ payday:{icon:'💰',label:'Payday'},
+ event:{icon:'📅',label:'Event'},
+ milestone:{icon:'🏁',label:'Milestone'}
+};
+let editingItemId=null;
+
+
+const learningKey='ren-os-learning-history';
+let learningHistory=[];
+try{learningHistory=JSON.parse(localStorage.getItem(learningKey)||'[]')}catch(e){learningHistory=[]}
+
+const intelligenceKey='ren-os-intelligence-settings';
+let intelligenceSettings={sleepHours:8,wakeBuffer:75,windDownMinutes:45};
+try{intelligenceSettings={...intelligenceSettings,...JSON.parse(localStorage.getItem(intelligenceKey)||'{}')}}catch(e){}
+
+const dispatchKey='ren-os-dispatch-settings';
+let dispatchSettings={driveMinutes:30,airportBuffer:45,prepMinutes:30,recoveryHours:12};
+try{dispatchSettings={...dispatchSettings,...JSON.parse(localStorage.getItem(dispatchKey)||'{}')}}catch(e){}
+
+const repeatLabels={none:'Does not repeat',weekly:'Weekly',biweekly:'Every 2 weeks',monthly:'Monthly',yearly:'Yearly'};
+function nextOccurrence(item,from=new Date()){
+ const original=safeDate(item.date);
+ if(!item.repeat||item.repeat==='none'||original>=from)return original;
+ const d=new Date(original);
+ let guard=0;
+ while(d<from&&guard<500){
+  if(item.repeat==='weekly')d.setDate(d.getDate()+7);
+  else if(item.repeat==='biweekly')d.setDate(d.getDate()+14);
+  else if(item.repeat==='monthly')d.setMonth(d.getMonth()+1);
+  else if(item.repeat==='yearly')d.setFullYear(d.getFullYear()+1);
+  else break;
+  guard++;
+ }
+ return d;
+}
+
+function allEvents(){
+ const now=new Date();
+ return [...defaultEvents,...customEvents]
+  .map(e=>({...e,effectiveDate:nextOccurrence(e,now)}))
+  .sort((a,b)=>a.effectiveDate-b.effectiveDate);
+}
+
+
+const schedules={
+ home:[
+  [3,6,'Morning Preflight','Water, devotion, stretch, and prepare the day.'],
+  [6,10,'Departure','Breakfast, bills, exercise, or first home priority.'],
+  [10,14,'Cruise','Dragonfly Bliss, photography, projects, or focused work.'],
+  [14,18,'Approach','Errands, reading, reset, and prepare dinner.'],
+  [18,21.5,'At the Gate','Dinner, reflection, tomorrow prep, and wind down.'],
+  [21.5,27,'Lights Out','Rest is part of the mission.']
+ ],
+ flight:[
+  [3,6,'Crew Preflight','Uniform, food bag, badge, water, and departure preparation.'],
+  [6,10,'Report & Departure','Airport, sign-in, crew briefing, and first leg.'],
+  [10,14,'Inflight Operations','Service, hydration, protein, and passenger care.'],
+  [14,18,'Arrival / Turn','Arrival duties, van, hotel, or next leg.'],
+  [18,21.5,'Layover Reset','Eat, shower, charge devices, and protect rest.'],
+  [21.5,27,'Crew Rest','Sleep is operational readiness.']
+ ],
+ turbulence:[
+  [3,6,'Stabilize','Water and one quiet minute.'],
+  [6,10,'Nourish','Eat something and take essential medications.'],
+  [10,14,'Ground','Stretch or step outside briefly.'],
+  [14,18,'Reduce','Cancel what can wait.'],
+  [18,21.5,'Restore','Shower, comfort, and low stimulation.'],
+  [21.5,27,'Rest','Nothing more is required.']
+ ]
+};
+
+function save(){localStorage.setItem(dayKey,JSON.stringify(state))}
+function safeDate(value){
+ if(!value)return new Date(NaN);
+ const normalized=value.includes('T')?value:value+'T12:00:00';
+ const d=new Date(normalized);
+ return isNaN(d)?new Date(value):d;
+}
+function currentModeLabel(){return state.mode==='flight'?'FLIGHT ATTENDANT':state.mode==='turbulence'?'TURBULENCE':'HOME'}
+function currentSchedule(){return schedules[state.mode]}
+function currentBucket(){return state[state.mode]}
+function currentItems(){return state.mode==='flight'?flightItems:state.mode==='turbulence'?turbulenceItems:homeItems}
+
+function determineSpecialMission(){
+ const now=new Date();
+ const vacationStart=safeDate('2026-08-01'),vacationEnd=safeDate('2026-08-07');
+ if(now>=vacationStart&&now<=vacationEnd)return 'VACATION · REST, EXPLORE, RECHARGE';
+ return state.mode==='flight'?'WORK TRIP':state.mode==='turbulence'?'STABILIZE':'BUILD THE LIFE YOU WANT TO COME HOME TO';
+}
+
+
+function nextFlightObject(){
+ const now=new Date();
+ const flights=allEvents().filter(e=>e.type==='flight'&&(e.effectiveDate||safeDate(e.date))>=new Date(now.getTime()-12*3600000));
+ return flights[0]||null;
+}
+function dispatchReportDate(){
+ const flight=nextFlightObject();
+ if(currentTrip.reportDate)return safeDate(currentTrip.reportDate);
+ return flight?(flight.effectiveDate||safeDate(flight.date)):null;
+}
+function dispatchLeaveDate(){
+ const report=dispatchReportDate();if(!report)return null;
+ const total=(Number(dispatchSettings.driveMinutes)||0)+(Number(dispatchSettings.airportBuffer)||0);
+ return new Date(report.getTime()-total*60000);
+}
+function dispatchPrepDate(){
+ const leave=dispatchLeaveDate();if(!leave)return null;
+ return new Date(leave.getTime()-(Number(dispatchSettings.prepMinutes)||0)*60000);
+}
+function dispatchPhase(){
+ const report=dispatchReportDate();if(!report)return 'planning';
+ const now=new Date(),leave=dispatchLeaveDate(),prep=dispatchPrepDate();
+ const recoveryMs=(Number(dispatchSettings.recoveryHours)||12)*3600000;
+ if(now<prep)return 'planning';
+ if(now<leave)return 'preflight';
+ if(now<report)return 'departure';
+ if(now<new Date(report.getTime()+8*3600000))return 'duty';
+ if(now<new Date(report.getTime()+8*3600000+recoveryMs))return 'recovery';
+ return 'planning';
+}
+function saveDispatchSettings(){
+ dispatchSettings={
+  driveMinutes:Number(document.getElementById('driveMinutes').value)||0,
+  airportBuffer:Number(document.getElementById('airportBuffer').value)||0,
+  prepMinutes:Number(document.getElementById('prepMinutes').value)||0,
+  recoveryHours:Number(document.getElementById('recoveryHours').value)||12
+ };
+ localStorage.setItem(dispatchKey,JSON.stringify(dispatchSettings));
+   localStorage.setItem(learningKey,JSON.stringify(learningHistory));
+ renderDispatchBrain();renderOperationsBrain();renderCopilot();renderNeuralCore();renderChronos();renderIntelligence();renderPredictiveDirector();renderGenesis();renderMissionControl();
+}
+function loadDispatchSettings(){
+ Object.entries(dispatchSettings).forEach(([key,value])=>{const el=document.getElementById(key);if(el)el.value=value});
+}
+function dispatchActionText(phase){
+ const pct=readinessPercent();
+ if(!dispatchReportDate())return 'Enter your next trip in Flight Operations or the Schedule Manager.';
+ if(phase==='planning')return pct<50?'Begin crew preparation: pack, hydrate, eat protein, and review the trip briefing.':'Protect your margin and verify report, route, gate, and transportation.';
+ if(phase==='preflight')return 'Complete the preflight checklist. Finish water and protein targets before leaving home.';
+ if(phase==='departure')return 'Departure window is active. Leave for the airport and preserve your report buffer.';
+ if(phase==='duty')return 'Duty mode is active. Follow the operational sequence and update only what matters now.';
+ return 'Recovery window is active. Hydrate, eat, stretch, shower, and protect sleep.';
+}
+
+
+
+
+
+
+
+function genesisHealthScore(){
+ const readiness=forecastReadinessScore();
+ const core=coreHealthScore();
+ const objectBonus=coreMissionObject()?8:0;
+ const learningBonus=Math.min(8,recentLearning().length);
+ return Math.min(100,Math.round(readiness*.45+core*.45+objectBonus+learningBonus));
+}
+function genesisPrimaryMission(){
+ const rec=directorRecommendation();
+ const obj=coreMissionObject();
+ if(state.mode==='turbulence')return {title:'Stabilize first.',note:'Genesis is suppressing all nonessential demands.'};
+ if(obj?.type==='flight')return {title:rec.title,note:rec.note};
+ if(obj?.type==='bill')return {title:'Clear the nearest financial obligation.',note:obj.title+' is the controlling non-flight mission.'};
+ if(obj)return {title:'Advance '+obj.title+'.',note:'It is the nearest active Mission Object.'};
+ return {title:'Define the next mission.',note:'One clear Mission Object will activate the full command system.'};
+}
+function genesisExecutiveItems(){
+ const items=[];
+ const obj=coreMissionObject();
+ const predictions=generatePredictions();
+ const next=nextUpcomingEvent();
+ const finance=financialAlerts();
+ const report=dispatchReportDate();
+
+ if(obj)items.push({icon:typeMeta[obj.type]?.icon||'🎯',title:obj.title,meta:humanCountdown(obj.effectiveDate||obj.date),level:'attention'});
+ if(report)items.push({icon:'✈️',title:'Flight report',meta:report.toLocaleString([], {month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}),level:'critical'});
+ if(next&&(!obj||next.id!==obj.id))items.push({icon:typeMeta[next.type]?.icon||'📅',title:next.title,meta:humanCountdown(next.effectiveDate||next.date),level:''});
+ finance.slice(0,2).forEach(e=>items.push({icon:typeMeta[e.type]?.icon||'💰',title:e.title,meta:humanCountdown(e.effectiveDate||e.date),level:e.type==='bill'?'critical':'attention'}));
+ predictions.slice(0,3).forEach(p=>{
+  if(!items.some(i=>i.title===p.title))items.push({icon:p.level==='high'?'⚠️':'→',title:p.title,meta:p.confidence+'%',level:p.level==='high'?'critical':p.level==='medium'?'attention':''});
+ });
+ if(!items.length)items.push({icon:'✓',title:'No immediate command conflicts',meta:'stable',level:''});
+ return items.slice(0,7);
+}
+function genesisRecommendation(){
+ const director=directorRecommendation();
+ if(state.mode==='turbulence')return {title:'Remain in Turbulence Mode.',note:'Genesis will not expand the mission until you manually change mode.',mode:'turbulence'};
+ if(predictionRiskLevel()==='High')return {title:director.title,note:director.note,mode:director.mode};
+ if(financialAlerts().some(e=>e.type==='bill'))return {title:'Resolve the nearest bill before adding work.',note:'Financial risk is inside the seven-day command window.',mode:'home'};
+ if(coreMissionObject()?.type==='flight')return {title:director.title,note:director.note,mode:director.mode};
+ return {title:'Protect today’s top priority.',note:genesisPrimaryMission().note,mode:coreRecommendedMode()};
+}
+function applyGenesisRecommendation(){
+ const rec=genesisRecommendation();
+ state.mode=rec.mode;
+ save();
+ renderAll();
+ document.getElementById('genesisPanel').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function genesisSystemLines(){
+ return [
+  ['🧠','Memory Engine',customEvents.length+' objects',customEvents.length>0],
+  ['🛰️','Dispatch Brain',dispatchReportDate()?'flight recognized':'standby',!!dispatchReportDate()],
+  ['⚙️','Operations Brain',operationsAlerts().length+' signals',true],
+  ['🪷','Copilot',readinessPercent()+'% ready',true],
+  ['🧬','Neural Core',coreMissionObject()?'synchronized':'awaiting object',!!coreMissionObject()],
+  ['⏱️','Chronos Engine',new Date().toLocaleTimeString([], {hour:'numeric',minute:'2-digit',second:'2-digit'}),true],
+  ['🧠','Intelligence Layer',intelligenceMissionScore()+'% score',true],
+  ['🔭','Predictive Director',predictionRiskLevel()+' risk',true]
+ ];
+}
+function genesisInterpretationText(){
+ const mission=coreMissionObject();
+ const risk=predictionRiskLevel();
+ const learned=learnedAverages();
+ if(state.mode==='turbulence')return 'Genesis recognizes reduced capacity. The command system is intentionally limiting the day to essential care and recovery.';
+ if(!mission)return 'The system is healthy but has no controlling Mission Object. Add one mission to synchronize every module.';
+ let text=`${mission.title} is controlling the operating picture. Forecast risk is ${risk.toLowerCase()}.`;
+ if(learned.snapshots>=3)text+=` Learned readiness averages ${learned.readiness}%, with water at ${learned.water} oz and protein at ${learned.protein} g.`;
+ else text+=' More recorded snapshots will improve pattern confidence.';
+ return text;
+}
+function renderGenesis(){
+ const mission=genesisPrimaryMission(),rec=genesisRecommendation();
+ document.getElementById('genesisGreeting').textContent=intelligenceGreeting();
+ document.getElementById('genesisBrief').textContent=coreMissionObject()
+  ?`Genesis has unified ${coreMissionObject().title} across time, readiness, operations, prediction, and memory.`
+  :'Genesis is online and waiting for your next Mission Object.';
+ document.getElementById('genesisHealth').textContent=genesisHealthScore()+'%';
+ document.getElementById('genesisTransition').textContent=coreTransitionText();
+ document.getElementById('genesisMode').textContent=currentModeLabel();
+ document.getElementById('genesisMissions').textContent=customEvents.length;
+ document.getElementById('genesisRisk').textContent=predictionRiskLevel();
+ document.getElementById('genesisPriority').textContent=mission.title;
+ document.getElementById('genesisPriorityNote').textContent=mission.note;
+ document.getElementById('chiefActionTitle').textContent=rec.title;
+ document.getElementById('chiefActionNote').textContent=rec.note;
+ document.getElementById('genesisInterpretation').textContent=genesisInterpretationText();
+
+ const stack=document.getElementById('genesisExecutiveStack');stack.innerHTML='';
+ genesisExecutiveItems().forEach(item=>{
+  const d=document.createElement('div');d.className='executiveItem '+item.level;
+  d.innerHTML=`<span>${item.icon}</span><span>${item.title}</span><span class="executiveMeta">${item.meta}</span>`;
+  stack.appendChild(d);
+ });
+
+ const map=document.getElementById('genesisSystemMap');map.innerHTML='';
+ genesisSystemLines().forEach(([icon,name,status,online])=>{
+  const d=document.createElement('div');d.className='systemLine '+(online?'online':'');
+  d.innerHTML=`<span>${icon}</span><span>${name}</span><span class="systemState">${status}</span>`;
+  map.appendChild(d);
+ });
+}
+
+function average(values){
+ return values.length?values.reduce((a,b)=>a+b,0)/values.length:0;
+}
+function recentLearning(limit=14){
+ return learningHistory.slice(-limit);
+}
+function recordLearningSnapshot(){
+ const now=new Date();
+ const snapshot={
+  id:'snapshot-'+Date.now(),
+  date:now.toISOString(),
+  mode:state.mode,
+  water:Number(state.water)||0,
+  protein:Number(state.protein)||0,
+  readiness:readinessPercent(),
+  checklistReady:tripChecklistReady(),
+  missionType:coreMissionObject()?.type||'none',
+  reportHours:dispatchReportDate()?Math.round((dispatchReportDate()-now)/3600000*10)/10:null
+ };
+ learningHistory.push(snapshot);
+ learningHistory=learningHistory.slice(-90);
+ localStorage.setItem(learningKey,JSON.stringify(learningHistory));
+ renderPredictiveDirector();
+}
+function learnedAverages(){
+ const recent=recentLearning();
+ return {
+  snapshots:recent.length,
+  water:Math.round(average(recent.map(x=>Number(x.water)||0))),
+  protein:Math.round(average(recent.map(x=>Number(x.protein)||0))),
+  readiness:Math.round(average(recent.map(x=>Number(x.readiness)||0)))
+ };
+}
+function forecastReadinessScore(){
+ const base=intelligenceMissionScore();
+ const learned=learnedAverages();
+ if(!learned.snapshots)return base;
+ return Math.max(0,Math.min(100,Math.round(base*.65+learned.readiness*.35)));
+}
+function predictionRiskLevel(){
+ let points=0;
+ const report=dispatchReportDate();
+ if(report){
+  const hours=(report-new Date())/3600000;
+  if(hours<4)points+=3;
+  else if(hours<12)points+=2;
+  else if(hours<24)points+=1;
+ }
+ if(state.water<32)points+=1;
+ if(state.protein<20)points+=1;
+ if(state.mode==='flight'&&!tripChecklistReady())points+=2;
+ if(financialAlerts().some(e=>e.type==='bill'))points+=1;
+ if(forecastReadinessScore()<40)points+=2;
+ return points>=5?'High':points>=2?'Moderate':'Low';
+}
+function predictedMode(){
+ if(state.mode==='turbulence')return 'Turbulence';
+ const obj=coreMissionObject();
+ if(!obj)return 'Home';
+ const d=obj.effectiveDate||safeDate(obj.date);
+ const hours=(d-new Date())/3600000;
+ if(obj.type==='flight'&&hours<=24&&hours>-12)return 'Flight Attendant';
+ return 'Home';
+}
+function predictiveHorizon(){
+ const obj=coreMissionObject();
+ if(!obj)return '24 hr';
+ const hours=Math.max(1,Math.round(((obj.effectiveDate||safeDate(obj.date))-new Date())/3600000));
+ return hours>72?'72+ hr':hours+' hr';
+}
+function generatePredictions(){
+ const predictions=[];
+ const report=dispatchReportDate();
+ const learned=learnedAverages();
+
+ if(report){
+  const hours=(report-new Date())/3600000;
+  if(hours<=24&&state.water<64){
+   const need=Math.max(0,64-state.water);
+   predictions.push({level:hours<6?'high':'medium',title:'Hydration gap likely before report',note:`${need} oz remain to reach the flight-day threshold. Current pace: ${hydrationPace()}.`,confidence:88});
+  }
+  if(hours<=24&&state.protein<30){
+   const need=Math.max(0,30-state.protein);
+   predictions.push({level:hours<6?'high':'medium',title:'Protein gap likely before report',note:`${need} g remain before report. Schedule food before the departure window narrows.`,confidence:86});
+  }
+  if(hours<=12&&!tripChecklistReady()){
+   predictions.push({level:'high',title:'Preflight checklist at risk',note:'The flight is inside 12 hours and checklist readiness is incomplete.',confidence:92});
+  }
+  const bed=intelligenceBedtimeDate();
+  if(bed&&bed<new Date()){
+   predictions.push({level:'high',title:'Sleep opportunity is compressed',note:'The calculated bedtime target has passed. Reduce nonessential tasks.',confidence:90});
+  }
+ }
+
+ const bills=financialAlerts().filter(e=>e.type==='bill');
+ if(bills.length){
+  predictions.push({level:'medium',title:'Financial attention window approaching',note:`${bills.length} bill${bills.length===1?' is':'s are'} inside the next seven days.`,confidence:84});
+ }
+
+ if(learned.snapshots>=3){
+  if(learned.water<64)predictions.push({level:'medium',title:'Learned hydration pattern is below flight threshold',note:`Recent average is ${learned.water} oz. Begin water earlier on flight days.`,confidence:76});
+  if(learned.protein<30)predictions.push({level:'medium',title:'Learned protein pattern is below pre-report target',note:`Recent average is ${learned.protein} g. Front-load protein before departure.`,confidence:74});
+  if(learned.readiness<55)predictions.push({level:'medium',title:'Readiness trend needs protection',note:`Recent readiness average is ${learned.readiness}%. Reduce task load before critical missions.`,confidence:78});
+ }
+
+ if(!predictions.length){
+  predictions.push({level:'',title:'No major forecast conflicts',note:'The current mission is stable. Protect margin rather than adding complexity.',confidence:82});
+ }
+ return predictions.slice(0,6);
+}
+function directorRecommendation(){
+ const predictions=generatePredictions();
+ const top=predictions[0];
+ if(state.mode==='turbulence')return {title:'Continue stabilization.',note:'The predictive system will not override Turbulence Mode.',mode:'turbulence'};
+ if(top.title.includes('Hydration'))return {title:'Drink water before the next task.',note:top.note,mode:predictedMode()==='Flight Attendant'?'flight':'home'};
+ if(top.title.includes('Protein'))return {title:'Schedule protein now.',note:top.note,mode:predictedMode()==='Flight Attendant'?'flight':'home'};
+ if(top.title.includes('Preflight'))return {title:'Complete the flight checklist.',note:top.note,mode:'flight'};
+ if(top.title.includes('Sleep'))return {title:'Begin recovery immediately.',note:top.note,mode:'turbulence'};
+ if(top.title.includes('Financial'))return {title:'Clear the nearest bill.',note:top.note,mode:'home'};
+ return {title:'Protect the next transition.',note:top.note,mode:coreRecommendedMode()};
+}
+function applyDirectorRecommendation(){
+ const rec=directorRecommendation();
+ state.mode=rec.mode;
+ save();
+ renderAll();
+ document.getElementById('predictivePanel').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function patternInterpretationText(){
+ const a=learnedAverages();
+ if(!a.snapshots)return 'Learning begins when you record daily snapshots. Ren OS stores them only in this browser unless you export them.';
+ const notes=[];
+ if(a.water<64)notes.push('hydration tends to run below the flight-day threshold');
+ else notes.push('hydration is generally supporting readiness');
+ if(a.protein<30)notes.push('protein is often delayed');
+ else notes.push('protein is usually established early');
+ if(a.readiness<55)notes.push('overall readiness benefits from a lighter mission load');
+ else notes.push('overall readiness is trending stable');
+ return 'Across recent snapshots, '+notes.join(', ')+'.';
+}
+function exportLearningData(){
+ const payload={app:'Ren OS',version:'Genesis',exportedAt:new Date().toISOString(),learningHistory};
+ const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+ const url=URL.createObjectURL(blob);
+ const a=document.createElement('a');a.href=url;a.download='ren-os-learning-'+new Date().toISOString().slice(0,10)+'.json';
+ document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+}
+function clearLearningData(){
+ if(!confirm('Clear all locally learned snapshots?'))return;
+ learningHistory=[];
+ localStorage.removeItem(learningKey);
+ renderPredictiveDirector();
+}
+function renderPredictiveDirector(){
+ const predictions=generatePredictions(),rec=directorRecommendation(),a=learnedAverages();
+ const readiness=forecastReadinessScore(),risk=predictionRiskLevel();
+
+ document.getElementById('predictiveHeadline').textContent=coreMissionObject()?'Forecast prepared for '+coreMissionObject().title:'Forecast awaiting the next mission';
+ document.getElementById('predictiveSummary').textContent=coreMissionObject()
+  ?`Ren OS forecasts ${readiness}% readiness with ${risk.toLowerCase()} operational risk.`
+  :'Add a Mission Object or flight assignment to activate predictive planning.';
+ document.getElementById('forecastReadiness').textContent=readiness+'%';
+ document.getElementById('forecastRisk').textContent=risk;
+ document.getElementById('forecastMode').textContent=predictedMode();
+ document.getElementById('forecastHorizon').textContent=predictiveHorizon();
+
+ const stack=document.getElementById('predictionStack');stack.innerHTML='';
+ predictions.forEach(p=>{
+  const d=document.createElement('div');d.className='predictionItem '+p.level;
+  d.innerHTML=`<div class="predictionTitle">${p.title}</div><div class="predictionNote">${p.note}</div><div class="confidence">${p.confidence}% confidence</div>`;
+  stack.appendChild(d);
+ });
+
+ document.getElementById('directorActionTitle').textContent=rec.title;
+ document.getElementById('directorActionNote').textContent=rec.note;
+ document.getElementById('patternSnapshots').textContent=a.snapshots;
+ document.getElementById('patternWater').textContent=a.water+' oz';
+ document.getElementById('patternProtein').textContent=a.protein+' g';
+ document.getElementById('patternReadiness').textContent=a.readiness+'%';
+ document.getElementById('patternInterpretation').textContent=patternInterpretationText();
+}
+
+function intelligenceGreeting(){
+ const h=new Date().getHours();
+ return h<12?'Good morning, Captain Ren.':h<18?'Good afternoon, Captain Ren.':'Good evening, Captain Ren.';
+}
+function intelligenceLeaveDate(){
+ return dispatchLeaveDate();
+}
+function intelligenceWakeDate(){
+ const leave=intelligenceLeaveDate();
+ if(!leave)return null;
+ return new Date(leave.getTime()-(Number(intelligenceSettings.wakeBuffer)||75)*60000);
+}
+function intelligenceBedtimeDate(){
+ const wake=intelligenceWakeDate();
+ if(!wake)return null;
+ const sleep=(Number(intelligenceSettings.sleepHours)||8)*3600000;
+ return new Date(wake.getTime()-sleep);
+}
+function intelligenceWindDownDate(){
+ const bed=intelligenceBedtimeDate();
+ if(!bed)return null;
+ return new Date(bed.getTime()-(Number(intelligenceSettings.windDownMinutes)||45)*60000);
+}
+function saveIntelligenceSettings(){
+ intelligenceSettings={
+  sleepHours:Number(document.getElementById('sleepHours').value)||8,
+  wakeBuffer:Number(document.getElementById('wakeBuffer').value)||75,
+  windDownMinutes:Number(document.getElementById('windDownMinutes').value)||45
+ };
+ localStorage.setItem(intelligenceKey,JSON.stringify(intelligenceSettings));
+ renderIntelligence();
+}
+function loadIntelligenceSettings(){
+ Object.entries(intelligenceSettings).forEach(([key,value])=>{
+  const el=document.getElementById(key);if(el)el.value=value;
+ });
+}
+function intelligenceMissionScore(){
+ let score=readinessPercent();
+ if(currentTrip.reportDate)score+=10;
+ if(state.water>=32)score+=8;
+ if(state.protein>=20)score+=8;
+ if(intelligenceWakeDate())score+=8;
+ return Math.min(100,Math.round(score));
+}
+function intelligenceBriefText(){
+ const report=dispatchReportDate(),leave=intelligenceLeaveDate(),wake=intelligenceWakeDate(),bed=intelligenceBedtimeDate();
+ if(state.mode==='turbulence')return 'Turbulence Mode is active. Ren OS is protecting recovery and limiting the plan to essential care.';
+ if(!report)return 'Add your next flight or Mission Object. Ren OS will calculate wake time, bedtime, departure, hydration, protein, and the full operational sequence.';
+ const destination=currentTrip.destination||'your destination';
+ const remaining=formatDuration(report-new Date());
+ return `You report for ${destination} in ${remaining}. Wake at ${wake.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})}, leave home at ${leave.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})}, and target bedtime at ${bed.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})}.`;
+}
+function intelligencePlanItems(){
+ const items=[];
+ const wind=intelligenceWindDownDate(),bed=intelligenceBedtimeDate(),wake=intelligenceWakeDate(),leave=intelligenceLeaveDate(),report=dispatchReportDate();
+ if(wind)items.push(['🌙','Begin wind-down',wind]);
+ if(bed)items.push(['🛏️','Bedtime target',bed]);
+ if(wake)items.push(['⏰','Wake up',wake]);
+ if(wake)items.push(['💧','First water',new Date(wake.getTime()+5*60000)]);
+ if(wake)items.push(['🧘🏽‍♀️','Devotion and stretch',new Date(wake.getTime()+15*60000)]);
+ if(wake)items.push(['🍳','Protein breakfast',new Date(wake.getTime()+35*60000)]);
+ if(leave)items.push(['🚗','Leave home',leave]);
+ if(report)items.push(['✈️','Report',report]);
+ return items.sort((a,b)=>a[2]-b[2]);
+}
+function intelligenceRisks(){
+ const risks=[];
+ const report=dispatchReportDate(),bed=intelligenceBedtimeDate();
+ if(!report)risks.push(['No flight assignment','Add the next trip to activate automatic planning.']);
+ if(report&&report-new Date()<6*3600000)risks.push(['Short preparation window','The report time is less than six hours away.']);
+ if(bed&&bed<new Date())risks.push(['Bedtime target has passed','Protect sleep as soon as practical.']);
+ if(state.water<32)risks.push(['Hydration behind','Add at least 32 oz before the next transition.']);
+ if(state.protein<20)risks.push(['Protein foundation low','Add a protein meal before departure.']);
+ if(!tripChecklistReady()&&state.mode==='flight')risks.push(['Preflight incomplete','The flight checklist still has open items.']);
+ if(!risks.length)risks.push(['No major conflicts','The current plan is operationally stable.']);
+ return risks;
+}
+function renderIntelligence(){
+ loadIntelligenceSettings();
+ const wake=intelligenceWakeDate(),bed=intelligenceBedtimeDate(),leave=intelligenceLeaveDate();
+ document.getElementById('intelGreeting').textContent=intelligenceGreeting();
+ document.getElementById('intelBrief').textContent=intelligenceBriefText();
+ document.getElementById('intelWake').textContent=wake?wake.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'}):'—';
+ document.getElementById('intelBedtime').textContent=bed?bed.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'}):'—';
+ document.getElementById('intelLeave').textContent=leave?leave.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'}):'—';
+ document.getElementById('intelScore').textContent=intelligenceMissionScore()+'%';
+
+ const plan=document.getElementById('intelPlan');plan.innerHTML='';
+ const items=intelligencePlanItems();
+ if(!items.length)plan.innerHTML='<div class="emptyState">Add a flight to generate the operational day.</div>';
+ items.forEach(([icon,title,date])=>{
+  const d=document.createElement('div');d.className='planItem';
+  d.innerHTML=`<span>${icon}</span><span>${title}</span><span class="planTime">${date.toLocaleString([], {month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}</span>`;
+  plan.appendChild(d);
+ });
+
+ const risks=document.getElementById('intelRisks');risks.innerHTML='';
+ intelligenceRisks().forEach(([title,note])=>{
+  const d=document.createElement('div');d.className='riskItem';
+  d.innerHTML=`<div class="riskTitle">${title}</div><div class="riskNote">${note}</div>`;
+  risks.appendChild(d);
+ });
+}
+
+function formatDuration(ms){
+ if(!isFinite(ms))return '—';
+ if(ms<=0)return 'NOW';
+ const total=Math.floor(ms/1000);
+ const days=Math.floor(total/86400);
+ const hours=Math.floor((total%86400)/3600);
+ const mins=Math.floor((total%3600)/60);
+ const secs=total%60;
+ if(days>0)return `${days}d ${hours}h ${mins}m`;
+ if(hours>0)return `${hours}h ${mins}m ${secs}s`;
+ return `${mins}m ${secs}s`;
+}
+function chronosNextObject(){
+ const obj=coreMissionObject();
+ if(obj)return obj;
+ return nextUpcomingEvent();
+}
+function chronosTargetDate(){
+ const obj=chronosNextObject();
+ return obj?(obj.effectiveDate||safeDate(obj.date)):null;
+}
+function hydrationPace(){
+ const target=state.mode==='flight'?64:128;
+ const remaining=Math.max(0,target-state.water);
+ const targetDate=dispatchReportDate()||chronosTargetDate();
+ if(!targetDate)return remaining?remaining+' oz remaining':'goal met';
+ const hours=Math.max(1,(targetDate-new Date())/3600000);
+ return remaining?Math.ceil(remaining/hours)+' oz/hr':'goal met';
+}
+function proteinPace(){
+ const target=state.mode==='flight'?30:170;
+ const remaining=Math.max(0,target-state.protein);
+ const targetDate=dispatchReportDate()||chronosTargetDate();
+ if(!targetDate)return remaining?remaining+' g remaining':'goal met';
+ const hours=Math.max(1,(targetDate-new Date())/3600000);
+ return remaining?Math.ceil(remaining/hours)+' g/hr':'goal met';
+}
+function chronosGuidanceText(){
+ const phase=neuralPhase();
+ const obj=chronosNextObject();
+ if(state.mode==='turbulence')return 'Turbulence Mode is active. Time is serving recovery, not productivity. Hydrate, eat, shower, stretch, and rest.';
+ if(!obj)return 'The runway is clear. Create one Mission Object so Chronos can organize the day.';
+ if(obj.type==='flight'){
+  if(phase==='planning')return 'Use this window to prepare without rushing. Pack, hydrate, eat protein, and verify your trip details.';
+  if(phase==='preflight')return 'Preflight is active. Complete the checklist and protect the leave-home buffer.';
+  if(phase==='departure')return 'Departure window is active. Leave for the airport now.';
+  if(phase==='duty')return 'Duty time is active. Focus only on operational tasks.';
+  return 'Recovery time is active. Hydration, food, stretching, and sleep now outrank expansion.';
+ }
+ if(obj.type==='bill')return 'A financial deadline is approaching. Clear it before the day becomes crowded.';
+ return 'Chronos is protecting the next transition: '+obj.title+'.';
+}
+function chronosTimelineItems(){
+ const items=[],report=dispatchReportDate(),leave=dispatchLeaveDate(),prep=dispatchPrepDate();
+ if(prep)items.push(['🏠','Begin home preparation',prep]);
+ if(leave)items.push(['🚗','Leave home',leave]);
+ if(report)items.push(['✈️','Report',report]);
+ const next=nextUpcomingEvent();
+ if(next&&!items.some(x=>x[2]?.getTime()===(next.effectiveDate||safeDate(next.date)).getTime())){
+  items.push([typeMeta[next.type]?.icon||next.icon||'📅',next.title,next.effectiveDate||safeDate(next.date)]);
+ }
+ return items.sort((a,b)=>a[2]-b[2]).slice(0,5);
+}
+function renderChronos(){
+ const now=new Date();
+ const time=now.toLocaleTimeString([], {hour:'numeric',minute:'2-digit',second:'2-digit'});
+ const date=now.toLocaleDateString([], {weekday:'long',month:'long',day:'numeric',year:'numeric'});
+ const target=chronosTargetDate(),obj=chronosNextObject();
+
+ const cTime=document.getElementById('chronosTime');
+ if(cTime)cTime.textContent=time;
+ const cDate=document.getElementById('chronosDate');
+ if(cDate)cDate.textContent=date;
+
+ const headerClock=document.getElementById('clock');
+ if(headerClock)headerClock.textContent=time;
+ const headerDate=document.getElementById('date');
+ if(headerDate)headerDate.textContent=date;
+
+ document.getElementById('chronosNextTitle').textContent=obj?obj.title:'Awaiting Mission Object';
+ document.getElementById('chronosCountdown').textContent=target?formatDuration(target-now):'—';
+ document.getElementById('chronosNextNote').textContent=obj?(typeMeta[obj.type]?.label||'Mission Object'):'Add a flight, bill, payday, event, or milestone.';
+ document.getElementById('chronosCurrentPhase').textContent=neuralPhase().replace(/^\w/,c=>c.toUpperCase());
+ document.getElementById('chronosLeaveHome').textContent=dispatchLeaveDate()?dispatchLeaveDate().toLocaleTimeString([], {hour:'numeric',minute:'2-digit'}):'—';
+ document.getElementById('chronosWaterPace').textContent=hydrationPace();
+ document.getElementById('chronosProteinPace').textContent=proteinPace();
+
+ const waterTarget=state.mode==='flight'?64:128;
+ const proteinTarget=state.mode==='flight'?30:170;
+ document.getElementById('chronosWaterFill').style.width=Math.min(100,state.water/waterTarget*100)+'%';
+ document.getElementById('chronosProteinFill').style.width=Math.min(100,state.protein/proteinTarget*100)+'%';
+ document.getElementById('chronosGuidance').textContent=chronosGuidanceText();
+
+ const list=document.getElementById('chronosTimeline');list.innerHTML='';
+ const items=chronosTimelineItems();
+ if(!items.length)list.innerHTML='<div class="emptyState">No timed transitions yet.</div>';
+ items.forEach(([icon,title,dateObj])=>{
+  const d=document.createElement('div');d.className='chronosItem';
+  d.innerHTML=`<span>${icon}</span><span>${title}</span><span class="chronosWhen">${dateObj.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})}</span>`;
+  list.appendChild(d);
+ });
+}
+
+function coreMissionObject(){
+ const now=new Date();
+ const candidates=allEvents().filter(e=>(e.effectiveDate||safeDate(e.date))>=new Date(now.getTime()-12*3600000));
+ if(currentTrip.reportDate){
+  return {id:'current-trip',title:currentTrip.title||'Current Flight Assignment',type:'flight',date:currentTrip.reportDate,effectiveDate:safeDate(currentTrip.reportDate),details:(currentTrip.origin||'DAL')+' → '+(currentTrip.destination||'—')};
+ }
+ return candidates[0]||null;
+}
+function coreRecommendedMode(){
+ const obj=coreMissionObject();
+ if(state.mode==='turbulence')return 'turbulence';
+ if(!obj)return 'home';
+ const d=obj.effectiveDate||safeDate(obj.date);
+ const hours=(d-new Date())/3600000;
+ if(obj.type==='flight'&&hours<=24&&hours>-12)return 'flight';
+ return 'home';
+}
+function neuralPhase(){
+ const obj=coreMissionObject();
+ if(!obj)return 'planning';
+ if(obj.type==='flight')return dispatchPhase();
+ const mins=minutesUntil(obj.effectiveDate||obj.date);
+ if(mins>24*60)return 'planning';
+ if(mins>2*60)return 'preparation';
+ if(mins>0)return 'execution';
+ return 'recovery';
+}
+function coreHealthScore(){
+ const objectScore=coreMissionObject()?20:5;
+ const readiness=readinessPercent();
+ const dataScore=Math.min(20,customEvents.length*4);
+ const tripScore=currentTrip.reportDate?15:0;
+ const stability=state.mode==='turbulence'?20:15;
+ return Math.min(100,Math.round(objectScore+readiness*.3+dataScore+tripScore+stability));
+}
+function coreTransitionText(){
+ const obj=coreMissionObject();
+ if(!obj)return 'Add a mission';
+ return humanCountdown(obj.effectiveDate||obj.date);
+}
+function coreDecision(){
+ const obj=coreMissionObject(),mode=coreRecommendedMode(),phase=neuralPhase();
+ if(state.mode==='turbulence')return {title:'Remain in Turbulence Mode.',note:'Capacity protection overrides all nonessential automation.',mode:'turbulence'};
+ if(!obj)return {title:'Create the next Mission Object.',note:'One clear object will synchronize Copilot, Dispatch, Timeline, and Focus.',mode:'home'};
+ if(mode==='flight'){
+  if(phase==='planning')return {title:'Begin flight preparation.',note:'Review the trip, hydrate, eat protein, and protect tomorrow’s margin.',mode:'flight'};
+  if(phase==='preflight')return {title:'Complete preflight now.',note:'The departure window is approaching. Finish the checklist and leave on time.',mode:'flight'};
+  if(phase==='departure')return {title:'Move to the airport.',note:'Departure timing is now the controlling signal.',mode:'flight'};
+  if(phase==='duty')return {title:'Stay in Duty Mode.',note:'Follow only the operational sequence that matters now.',mode:'flight'};
+  return {title:'Enter recovery.',note:'Hydrate, nourish, stretch, and protect sleep.',mode:'home'};
+ }
+ if(obj.type==='bill')return {title:'Clear the financial object.',note:obj.title+' is the nearest mission requiring attention.',mode:'home'};
+ return {title:'Advance '+obj.title+'.',note:'This is the nearest active Mission Object.',mode:'home'};
+}
+function applyCoreDecision(){
+ const decision=coreDecision();
+ state.mode=decision.mode;
+ save();
+ renderAll();
+ document.getElementById('neuralCorePanel').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function renderNeuralCore(){
+ const obj=coreMissionObject(),score=coreHealthScore(),decision=coreDecision();
+ document.getElementById('neuralTitle').textContent=obj?'Core synchronized to '+obj.title:'Core awaiting a Mission Object';
+ document.getElementById('neuralSummary').textContent=obj?'Copilot, Dispatch, Focus, Timeline, readiness, and mode logic are reading the same mission.':'Add one flight, bill, payday, event, or milestone to activate shared intelligence.';
+ document.getElementById('coreScore').textContent=score+'%';
+ document.getElementById('coreScoreRing').style.setProperty('--score',score);
+ document.getElementById('coreObject').textContent=obj?obj.title:'None';
+ document.getElementById('coreMode').textContent=currentModeLabel();
+ document.getElementById('corePhase').textContent=neuralPhase().replace(/^\w/,c=>c.toUpperCase());
+ document.getElementById('coreTransition').textContent=coreTransitionText();
+ document.getElementById('coreDecisionTitle').textContent=decision.title;
+ document.getElementById('coreDecisionNote').textContent=decision.note;
+ const signals=[
+  ['🧠','Memory Engine',customEvents.length+' objects'],
+  ['🛰️','Dispatch Brain',dispatchReportDate()?'report recognized':'awaiting flight'],
+  ['🪷','Copilot',readinessPercent()+'% readiness'],
+  ['◎','Focus Panel',document.getElementById('currentTitle')?.textContent||'active'],
+  ['⌛','Dynamic Timeline',(nextUpcomingEvent()?.title||'clear')],
+  ['✈️','Flight Operations',currentTrip.reportDate?'connected':'standby']
+ ];
+ const box=document.getElementById('signalFlow');box.innerHTML='';
+ signals.forEach(([icon,name,status])=>{
+  const d=document.createElement('div');d.className='signalNode '+(status&&!status.includes('awaiting')&&!status.includes('standby')?'active':'');
+  d.innerHTML=`<span>${icon}</span><span>${name}</span><span class="signalStatus">${status}</span>`;
+  box.appendChild(d);
+ });
+}
+
+function copilotGreeting(){
+ const h=new Date().getHours();
+ return h<12?'Good morning, Ren.':h<18?'Good afternoon, Ren.':'Good evening, Ren.';
+}
+function copilotPrimaryMission(){
+ const flight=nextFlightObject(),next=nextUpcomingEvent(),finance=financialAlerts();
+ if(state.mode==='turbulence')return {title:'Stabilize without guilt.',reason:'Capacity protection is the mission. Essentials only.'};
+ if(flight&&minutesUntil(flight.effectiveDate||flight.date)<=24*60)return {title:'Prepare for '+(currentTrip.destination||'departure')+'.',reason:'Your next flight is inside the 24-hour operational window.'};
+ if(finance.some(e=>e.type==='bill'))return {title:'Clear the nearest financial obligation.',reason:'A bill is inside the seven-day attention window.'};
+ if(next)return {title:'Move '+next.title+' forward.',reason:'It is the next scheduled Mission Object.'};
+ return {title:'Choose one meaningful priority.',reason:'The runway is clear enough to create intentional momentum.'};
+}
+function copilotSequence(){
+ const sequence=[];
+ if(state.mode==='turbulence'){
+  sequence.push(['💧','Drink water','now'],['🍲','Eat','next'],['🌿','Five minutes outside','later']);
+  return sequence;
+ }
+ const flight=nextFlightObject();
+ if(flight&&minutesUntil(flight.effectiveDate||flight.date)<=24*60){
+  if(state.water<64)sequence.push(['💧','Reach 64 oz before report',Math.max(0,64-state.water)+' oz']);
+  if(state.protein<30)sequence.push(['🍳','Reach 30 g protein before report',Math.max(0,30-state.protein)+' g']);
+  if(!tripChecklistReady())sequence.push(['☐','Complete preflight checklist','']);
+  sequence.push(['🚗','Protect leave-home time',dispatchLeaveDate()?dispatchLeaveDate().toLocaleTimeString([], {hour:'numeric',minute:'2-digit'}):'']);
+  return sequence;
+ }
+ const alerts=operationsAlerts();
+ alerts.slice(0,4).forEach(a=>sequence.push([a.level==='urgent'?'!':'→',a.title,a.note]));
+ return sequence;
+}
+function renderCopilot(){
+ const mission=copilotPrimaryMission(),score=readinessPercent(),next=nextUpcomingEvent();
+ document.getElementById('copilotGreeting').textContent=copilotGreeting();
+ document.getElementById('copilotPriority').textContent=mission.title;
+ document.getElementById('copilotReason').textContent=mission.reason;
+ document.getElementById('copilotScore').textContent=score+'%';
+ document.getElementById('copilotScoreRing').style.setProperty('--score',score);
+
+ let summary='Your operating picture is stable.';
+ if(state.mode==='turbulence')summary='Turbulence Mode is active. Ren OS has reduced the mission to hydration, nourishment, basic care, and recovery.';
+ else if(next)summary='Your next Mission Object is '+next.title+' in '+humanCountdown(next.effectiveDate||next.date)+'. Current readiness is '+score+'%.';
+ document.getElementById('copilotSummary').textContent=summary;
+
+ const seq=document.getElementById('copilotSequence');seq.innerHTML='';
+ copilotSequence().slice(0,5).forEach(([icon,title,time])=>{
+  const d=document.createElement('div');d.className='copilotItem';
+  d.innerHTML=`<span>${icon}</span><span>${title}</span><span class="actionTime">${time}</span>`;
+  seq.appendChild(d);
+ });
+ if(!seq.children.length)seq.innerHTML='<div class="emptyState">No immediate sequence required.</div>';
+
+ let note='Start with the next right thing.';
+ if(score>=80)note='You are well positioned. Protect your margin rather than adding more.';
+ else if(score>=50)note='The mission is viable. Complete one readiness gap before expanding.';
+ else note='Reduce complexity. Water, protein, and the active checklist will create lift.';
+ document.getElementById('copilotNote').textContent=note;
+}
+
+function financialAlerts(){
+ const now=new Date(),horizon=new Date(now.getTime()+7*86400000);
+ return allEvents().filter(e=>{
+  const d=e.effectiveDate||safeDate(e.date);
+  return (e.type==='bill'||e.type==='payday')&&d>=now&&d<=horizon;
+ });
+}
+function operationsAlerts(){
+ const alerts=[],now=new Date(),flight=nextFlightObject(),finance=financialAlerts();
+ if(flight){
+  const d=flight.effectiveDate||safeDate(flight.date);
+  const mins=Math.floor((d-now)/60000);
+  if(mins<=24*60)alerts.push({level:'urgent',title:'Flight within 24 hours',note:flight.title+' · '+humanCountdown(d)});
+  else if(mins<=72*60)alerts.push({level:'attention',title:'Flight preparation window',note:flight.title+' · '+humanCountdown(d)});
+ }
+ if(state.water<32)alerts.push({level:'attention',title:'Hydration is behind',note:'Add at least 32 oz before the next major task.'});
+ if(state.protein<30)alerts.push({level:'attention',title:'Protein foundation is low',note:'Add a protein meal before the day accelerates.'});
+ finance.forEach(e=>{
+  const d=e.effectiveDate||safeDate(e.date);
+  alerts.push({level:e.type==='bill'?'urgent':'attention',title:e.title,note:(typeMeta[e.type]?.label||'Financial')+' · '+humanCountdown(d)+(e.amount?' · '+e.amount:'')});
+ });
+ if(!alerts.length)alerts.push({level:'',title:'No immediate operational conflicts',note:'Protect your margin and continue the current mission.'});
+ return alerts.slice(0,6);
+}
+function renderOperationsBrain(){
+ const alerts=operationsAlerts(),flight=nextFlightObject(),finance=financialAlerts();
+ document.getElementById('opsBrainReadiness').textContent=readinessPercent()+'%';
+ document.getElementById('opsBrainFlight').textContent=flight?humanCountdown(flight.effectiveDate||flight.date):'—';
+ document.getElementById('opsBrainFinance').textContent=finance.length;
+ document.getElementById('opsBrainObjects').textContent=customEvents.length;
+
+ const box=document.getElementById('operationsAlerts');box.innerHTML='';
+ alerts.forEach(a=>{
+  const d=document.createElement('div');d.className='alertItem '+a.level;
+  d.innerHTML=`<div class="alertTitle">${a.title}</div><div class="alertNote">${a.note}</div>`;
+  box.appendChild(d);
+ });
+
+ let text='The operating picture is stable.';
+ if(state.mode==='turbulence')text='Turbulence Mode is protecting capacity. Nonessential demands should remain secondary.';
+ else if(flight&&minutesUntil(flight.effectiveDate||flight.date)<=24*60)text='Flight preparation is now the primary operating priority.';
+ else if(finance.some(e=>e.type==='bill'))text='A financial obligation is inside the seven-day attention window.';
+ else if(readinessPercent()<40)text='Readiness is low. Improve water, protein, and the active checklist before expanding the mission.';
+ document.getElementById('operationsInterpretation').textContent=text;
+}
+
+function renderDispatchBrain(){
+ const flight=nextFlightObject(),report=dispatchReportDate(),leave=dispatchLeaveDate();
+ const phase=dispatchPhase();
+ const origin=currentTrip.origin||'DAL';
+ const destination=currentTrip.destination||(flight?.details?.includes('→')?flight.details.split('→')[1].trim():'—');
+ document.getElementById('dispatchRoute').textContent=origin+' → '+destination;
+ document.getElementById('dispatchTitle').textContent=currentTrip.title||flight?.title||'Add a flight Mission Object to activate Dispatch.';
+ document.getElementById('dispatchState').textContent=phase.toUpperCase()+' PHASE';
+ document.getElementById('dispatchReport').textContent=report?report.toLocaleString([], {month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}):'—';
+ document.getElementById('dispatchLeave').textContent=leave?leave.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'}):'—';
+ document.getElementById('dispatchCountdown').textContent=report?humanCountdown(report):'—';
+ document.getElementById('dispatchReady').textContent=readinessPercent()+'%';
+ document.getElementById('dispatchWater').textContent=Math.max(0,64-state.water)+' oz remaining';
+ document.getElementById('dispatchProtein').textContent=Math.max(0,30-state.protein)+' g remaining';
+ document.getElementById('dispatchAction').textContent=dispatchActionText(phase);
+ document.querySelectorAll('[data-dispatch-phase]').forEach(el=>el.classList.toggle('active',el.dataset.dispatchPhase===phase));
+
+ const log=document.getElementById('brainLog');log.innerHTML='';
+ const entries=[];
+ if(report)entries.push(['✈️','Report recognized for '+report.toLocaleString()]);
+ if(leave)entries.push(['🚗','Leave-home time calculated for '+leave.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})]);
+ entries.push(['◎','Operating mode: '+currentModeLabel()]);
+ entries.push(['◔','Readiness calculated at '+readinessPercent()+'%']);
+ entries.slice(0,4).forEach(([icon,text])=>{
+  const d=document.createElement('div');d.className='brainLogItem';d.innerHTML=`<span>${icon}</span><span>${text}</span>`;log.appendChild(d);
+ });
+}
+function applyDispatchMode(){
+ const phase=dispatchPhase(),report=dispatchReportDate();
+ if(!report||state.mode==='turbulence')return;
+ const now=new Date();
+ const hours=(report-now)/3600000;
+ if(hours<=24&&hours>-12)state.mode='flight';
+ if(phase==='recovery'&&hours<-8)state.mode='home';
+ save();
+}
+
+function nextUpcomingEvent(){
+ const now=new Date();
+ return allEvents().find(e=>(e.effectiveDate||safeDate(e.date))>=now)||null;
+}
+function minutesUntil(dateValue){
+ const ms=(dateValue instanceof Date?dateValue:safeDate(dateValue))-new Date();
+ return Math.floor(ms/60000);
+}
+function humanCountdown(dateValue){
+ const mins=minutesUntil(dateValue);
+ if(!isFinite(mins))return '—';
+ if(mins<=0)return 'NOW';
+ if(mins<60)return mins+' min';
+ const hours=Math.floor(mins/60);
+ if(hours<24)return hours+'h '+(mins%60)+'m';
+ return Math.floor(hours/24)+'d '+(hours%24)+'h';
+}
+function readinessPercent(){
+ const items=currentItems(),bucket=currentBucket();
+ let complete=items.filter(([id])=>bucket[id]).length;
+ let total=items.length;
+ if(state.mode!=='turbulence'){
+  total+=2;
+  if(state.water>=128)complete++;
+  if(state.protein>=170)complete++;
+ }
+ return total?Math.round(complete/total*100):0;
+}
+function autoSelectMode(){
+ applyDispatchMode();
+ const next=nextUpcomingEvent();
+ if(!next)return;
+ const mins=minutesUntil(next.date);
+ if(next.type==='flight' && mins>=0 && mins<=24*60 && state.mode!=='turbulence'){
+  state.mode='flight';
+  save();
+ }
+}
+function missionCopy(){
+ const next=nextUpcomingEvent();
+ const pct=readinessPercent();
+ if(state.mode==='turbulence'){
+  return {
+   headline:'Stabilize first.',
+   sub:'Only essentials are active. Water, nourishment, rest, and one human connection are enough.'
+  };
+ }
+ if(state.mode==='flight'){
+  if(currentTrip.reportDate){
+   const mins=minutesUntil(currentTrip.reportDate);
+   if(mins<=0)return {headline:'Duty mode is active.',sub:'Follow the Flight Operations Center and complete the next operational step.'};
+   if(mins<=120)return {headline:'Report is approaching.',sub:'Complete preflight, hydrate, eat protein, and protect your departure buffer.'};
+   return {headline:'Prepare for '+(currentTrip.destination||'departure')+'.',sub:'Your trip briefing, checklist, timeline, and report countdown are connected.'};
+  }
+  return {headline:'Flight mode is ready.',sub:'Add your trip briefing in Flight Operations to activate report countdowns and route guidance.'};
+ }
+ if(next){
+  const mins=minutesUntil(next.date);
+  if(next.type==='bill'&&mins<=72*60)return {headline:'A bill is coming due.',sub:next.title+' is due in '+humanCountdown(next.effectiveDate||next.date)+'. Review it before the day becomes busy.'};
+  if(next.type==='payday'&&mins<=72*60)return {headline:'Payday is approaching.',sub:next.title+' arrives in '+humanCountdown(next.effectiveDate||next.date)+'.'};
+  return {headline:'Move today forward.',sub:'Your next scheduled item is '+next.title+' in '+humanCountdown(next.effectiveDate||next.date)+'.'};
+ }
+ return {headline:'The runway is clear.',sub:'No upcoming events are scheduled. Choose one meaningful priority for today.'};
+}
+function renderMissionControl(){
+ const next=nextUpcomingEvent();
+ const copy=missionCopy();
+ document.getElementById('missionHeadline').textContent=copy.headline;
+ document.getElementById('missionSub').textContent=copy.sub;
+ document.getElementById('briefNextEvent').textContent=next?next.title:'No upcoming event';
+ document.getElementById('briefCountdown').textContent=next?humanCountdown(next.effectiveDate||next.date):'—';
+ document.getElementById('briefReadiness').textContent=readinessPercent()+'%';
+
+ const box=document.getElementById('missionActions');box.innerHTML='';
+ const actions=[];
+ if(state.mode==='flight'){
+  if(currentTrip.reportDate)actions.push(['✈️','Report: '+(currentTrip.origin||'—')+' → '+(currentTrip.destination||'—'),humanCountdown(currentTrip.reportDate)]);
+  if(!tripChecklistReady())actions.push(['☐','Complete preflight checklist','']);
+  if(state.water<64)actions.push(['💧','Hydrate before report',Math.max(0,64-state.water)+' oz']);
+  if(state.protein<30)actions.push(['🍳','Add a protein meal',Math.max(0,30-state.protein)+' g']);
+ }else if(state.mode==='turbulence'){
+  actions.push(['💧','Drink water','now'],['🍲','Eat something nourishing','next'],['🌿','Step outside briefly','later']);
+ }else{
+  const schedule=currentSchedule();
+  const now=new Date(),h=now.getHours()+now.getMinutes()/60;
+  let idx=schedule.findIndex(([start,end])=>end>24?(h>=start||h<end-24):(h>=start&&h<end));
+  if(idx<0)idx=0;
+  actions.push(['◎',schedule[idx][2],'now'],['→',schedule[(idx+1)%schedule.length][2],formatHour(schedule[(idx+1)%schedule.length][0])]);
+  if(next)actions.push([typeMeta[next.type]?.icon||next.icon||'📅',next.title,humanCountdown(next.effectiveDate||next.date)]);
+ }
+ actions.slice(0,4).forEach(([icon,title,time])=>{
+  const d=document.createElement('div');d.className='actionItem';
+  d.innerHTML=`<span>${icon}</span><span>${title}</span><span class="actionTime">${time}</span>`;
+  box.appendChild(d);
+ });
+ if(!actions.length)box.innerHTML='<div class="emptyState">No immediate actions. Protect your margin.</div>';
+}
+
+
+function startGenesisHeaderClock(){
+ const update=()=>{
+  try{
+   const now=new Date();
+   const clockEl=document.getElementById('clock');
+   const dateEl=document.getElementById('date');
+   if(clockEl)clockEl.textContent=now.toLocaleTimeString([],{
+    hour:'numeric',minute:'2-digit',second:'2-digit'
+   });
+   if(dateEl)dateEl.textContent=now.toLocaleDateString([],{
+    weekday:'long',month:'long',day:'numeric',year:'numeric'
+   });
+  }catch(error){
+   console.error('Genesis header clock error:',error);
+  }
+ };
+ update();
+ return setInterval(update,1000);
+}
+
+function clock(){
+ const n=new Date();
+ document.getElementById('clock').textContent=n.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'});
+ document.getElementById('date').textContent=n.toLocaleDateString([], {weekday:'long',month:'long',day:'numeric',year:'numeric'});
+ const h=n.getHours()+n.getMinutes()/60;
+ const schedule=currentSchedule();
+ let idx=schedule.findIndex(([start,end])=>end>24?(h>=start||h<end-24):(h>=start&&h<end));
+ if(idx<0)idx=0;
+ const [start,end,title,note]=schedule[idx];
+ const next=schedule[(idx+1)%schedule.length];
+ const timeLabel=start===21.5?'9:30 PM':formatHour(start);
+ const endLabel=end===21.5?'9:30 PM':end>24?formatHour(end-24):formatHour(end);
+ document.getElementById('phaseTop').textContent=title.toUpperCase();
+ document.getElementById('currentTitle').textContent=title;
+ document.getElementById('currentTime').textContent=timeLabel+' – '+endLabel;
+ document.getElementById('currentNote').textContent=note;
+ document.getElementById('nextTitle').textContent=next[2];
+ document.getElementById('nextFocusTime').textContent=next[0]===21.5?'9:30 PM':formatHour(next[0]);
+ document.getElementById('nextFocusNote').textContent=next[3];
+ renderLater(idx);
+ renderSchedule(idx);
+ renderTripBriefing();
+ renderDispatchBrain();
+ renderOperationsBrain();
+ renderCopilot();
+ renderNeuralCore();
+ renderChronos();
+ renderIntelligence();
+ renderPredictiveDirector();
+ renderGenesis();
+ renderMissionControl();
+}
+function formatHour(h){
+ const hour=Math.floor(h),mins=h%1?30:0,period=hour>=12?'PM':'AM',display=hour%12||12;
+ return display+':'+String(mins).padStart(2,'0')+' '+period;
+}
+function setMode(mode){
+ state.mode=mode;save();renderAll();renderMissionControl();
+}
+function renderModeButtons(){
+ const modeMeta={
+  home:{label:'HOME MODE',note:'Dragonfly Bliss, wellness, photography, and home projects.',accent:'var(--teal)',glow:'rgba(53,224,208,.16)'},
+  flight:{label:'FLIGHT ATTENDANT MODE',note:'Preflight, crew readiness, inflight care, arrival, and layover recovery.',accent:'var(--gold)',glow:'rgba(233,185,92,.17)'},
+  turbulence:{label:'TURBULENCE MODE',note:'The dashboard is simplified. Stabilize first; everything else may wait.',accent:'var(--orange)',glow:'rgba(242,138,69,.18)'}
+ };
+ const meta=modeMeta[state.mode];
+ document.documentElement.style.setProperty('--modeAccent',meta.accent);
+ document.documentElement.style.setProperty('--modeGlow',meta.glow);
+ document.querySelectorAll('.modeBtn').forEach(b=>{
+  const active=b.dataset.mode===state.mode;
+  b.classList.toggle('active',active);
+  b.setAttribute('aria-checked',String(active));
+ });
+ document.getElementById('modeTop').textContent=meta.label;
+ document.getElementById('modeBannerTitle').textContent=meta.label;
+ document.getElementById('modeBannerNote').textContent=meta.note;
+ document.getElementById('modeMission').textContent=determineSpecialMission();
+ document.getElementById('flightStatus').textContent=state.mode==='turbulence'?'STABILIZING ●':state.mode==='flight'?'CREW READY ●':'ON COURSE ●';
+ document.getElementById('homePanel').classList.toggle('hidden',state.mode!=='home');
+ document.getElementById('flightPanel').classList.toggle('hidden',state.mode!=='flight');
+ document.getElementById('turbulencePanel').classList.toggle('hidden',state.mode!=='turbulence');
+ document.getElementById('trackerPanel').classList.toggle('hidden',state.mode==='turbulence');
+ document.getElementById('flightOpsPanel').classList.toggle('hidden',state.mode!=='flight');
+}
+function renderHome(){
+ const box=document.getElementById('homeInstruments');box.innerHTML='';
+ homeItems.forEach(([id,icon,name,sub])=>{
+  const d=document.createElement('div');d.className='inst'+(state.home[id]?' done':'');
+  d.innerHTML=`<div class="instIcon">${icon}</div><div class="instName">${state.home[id]?'✓ ':''}${name}</div><div class="instSub">${sub}</div>`;
+  d.onclick=()=>{state.home[id]=!state.home[id];save();renderHome();updateRing()};box.appendChild(d);
+ });
+}
+function renderChecklist(target,items,bucket,clearanceId){
+ const box=document.getElementById(target);box.innerHTML='';
+ items.forEach(([id,label])=>{
+  const d=document.createElement('div');d.className='checkItem'+(state[bucket][id]?' done':'');
+  d.innerHTML=`<span class="checkDot">${state[bucket][id]?'✓':'○'}</span><span>${label}</span>`;
+  d.onclick=()=>{state[bucket][id]=!state[bucket][id];save();renderChecklist(target,items,bucket,clearanceId);updateRing();if(bucket==='flight')renderTripBriefing();renderMissionControl()};
+  box.appendChild(d);
+ });
+ const ready=items.every(([id])=>state[bucket][id]);
+ const c=document.getElementById(clearanceId);
+ if(c){
+  c.className='clearance'+(ready?' ready':'');
+  c.textContent=ready?(bucket==='flight'?'READY FOR DEPARTURE':'STABILIZED'):(bucket==='flight'?'PREPARING FOR DEPARTURE':'STABILIZING');
+ }
+}
+function updateRing(){
+ const items=currentItems(),bucket=currentBucket();
+ let complete=items.filter(([id])=>bucket[id]).length;
+ if(state.mode!=='turbulence'){
+  if(state.water>=128)complete++;
+  if(state.protein>=170)complete++;
+ }
+ const total=items.length+(state.mode==='turbulence'?0:2);
+ document.getElementById('ringNum').textContent=complete+'/'+total;
+ document.getElementById('ring').style.setProperty('--pct',(complete/total*100)+'%');
+}
+function renderLater(currentIdx){
+ const box=document.getElementById('laterList');box.innerHTML='';
+ const schedule=currentSchedule();
+ const icons=state.mode==='flight'?['✈️','🛬','🚌','🏨','🌙','☕']:state.mode==='turbulence'?['💧','🍲','🌿','🛁','📵','🌙']:['🌿','📷','💪','📖','🍽️','🌙'];
+ for(let offset=2;offset<=4;offset++){
+  const item=schedule[(currentIdx+offset)%schedule.length];
+  const d=document.createElement('div');d.className='laterItem';
+  const start=item[0]===21.5?'9:30 PM':formatHour(item[0]);
+  d.innerHTML=`<span class="laterIcon">${icons[(currentIdx+offset)%icons.length]}</span><span class="laterName">${item[2]}</span><span class="laterTime">${start}</span>`;
+  box.appendChild(d);
+ }
+}
+function renderSchedule(currentIdx){
+ const box=document.getElementById('scheduleList');box.innerHTML='';
+ currentSchedule().forEach(([start,end,title,note],i)=>{
+  const d=document.createElement('div');d.className='scheduleRow'+(i===currentIdx?' current':'');
+  const startLabel=start===21.5?'9:30 PM':formatHour(start);
+  const endLabel=end===21.5?'9:30 PM':end>24?formatHour(end-24):formatHour(end);
+  d.innerHTML=`<div class="scheduleTime">${startLabel} – ${endLabel}</div><div class="scheduleTitle">${i===currentIdx?'➤ ':''}${title}</div><div class="scheduleNote">${note}</div>`;
+  box.appendChild(d);
+ });
+}
+function renderTimeline(){
+ const box=document.getElementById('timeline');box.innerHTML='';const now=new Date();
+ const upcoming=allEvents().filter(e=>e.effectiveDate>=new Date(now.getTime()-86400000)).slice(0,8);
+ upcoming.forEach(e=>{
+  const t=e.effectiveDate||safeDate(e.date),days=Math.max(0,Math.ceil((t-now)/86400000));
+  const meta=typeMeta[e.type]||{icon:e.icon||'📅',label:'Event'};
+  const icon=e.icon||meta.icon;
+  const d=document.createElement('div');d.className='event';
+  const time=t.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'});
+  d.innerHTML=`<div><strong>${icon} ${e.title}</strong><div class="eventDate">${t.toLocaleDateString([], {month:'long',day:'numeric',year:'numeric'})} · ${time}<br>${e.details||meta.label}</div></div><div class="days">${days}<div class="small">days</div></div>`;
+  box.appendChild(d);
+ });
+ if(!upcoming.length)box.innerHTML='<div class="small">No upcoming timeline items yet.</div>';
+}
+function addScheduleItem(){
+ const type=document.getElementById('itemType').value;
+ const title=document.getElementById('itemTitle').value.trim();
+ const date=document.getElementById('itemDate').value;
+ const details=document.getElementById('itemDetails').value.trim();
+ const repeat=document.getElementById('itemRepeat').value;
+ const amount=document.getElementById('itemAmount').value.trim();
+ if(!title||!date){alert('Please enter both a title and a date.');return}
+
+ if(editingItemId){
+  customEvents=customEvents.map(e=>e.id===editingItemId?{...e,type,title,date,details,repeat,amount,icon:typeMeta[type].icon}:e);
+ }else{
+  customEvents.push({id:'custom-'+Date.now(),type,title,date,details,repeat,amount,icon:typeMeta[type].icon});
+ }
+ localStorage.setItem(scheduleKey,JSON.stringify(customEvents));
+
+ const saved=editingItemId?customEvents.find(e=>e.id===editingItemId):customEvents[customEvents.length-1];
+ if(type==='flight'&&!currentTrip.reportDate){
+  currentTrip={...currentTrip,title,reportDate:date,notes:details};
+  localStorage.setItem(tripKey,JSON.stringify(currentTrip));
+   localStorage.setItem(dispatchKey,JSON.stringify(dispatchSettings));
+  loadTripForm();renderTripBriefing();
+ }
+ editingItemId=null;
+ autoSelectMode();
+ clearScheduleForm();
+ renderTimeline();renderSavedItems();renderMemoryEngine();renderModeButtons();renderDispatchBrain();renderOperationsBrain();renderCopilot();renderNeuralCore();renderChronos();renderIntelligence();renderPredictiveDirector();renderGenesis();renderMissionControl();clock();
+}
+function clearScheduleForm(){
+ editingItemId=null;
+ document.getElementById('itemTitle').value='';
+ document.getElementById('itemDate').value='';
+ document.getElementById('itemDetails').value='';
+ document.getElementById('itemRepeat').value='none';
+ document.getElementById('itemAmount').value='';
+ document.getElementById('saveItemBtn').textContent='Add to Ren OS';
+ document.getElementById('editBanner').classList.remove('show');
+}
+function editScheduleItem(id){
+ const e=customEvents.find(x=>x.id===id);if(!e)return;
+ editingItemId=id;
+ document.getElementById('itemType').value=e.type;
+ document.getElementById('itemTitle').value=e.title||'';
+ document.getElementById('itemDate').value=e.date||'';
+ document.getElementById('itemDetails').value=e.details||'';
+ document.getElementById('itemRepeat').value=e.repeat||'none';
+ document.getElementById('itemAmount').value=e.amount||'';
+ document.getElementById('saveItemBtn').textContent='Update Mission Object';
+ document.getElementById('editBanner').classList.add('show');
+ scrollToScheduleManager();
+}
+function duplicateScheduleItem(id){
+ const e=customEvents.find(x=>x.id===id);if(!e)return;
+ customEvents.push({...e,id:'custom-'+Date.now(),title:e.title+' — Copy'});
+ localStorage.setItem(scheduleKey,JSON.stringify(customEvents));
+ renderTimeline();renderSavedItems();renderMemoryEngine();renderMissionControl();
+}
+function deleteScheduleItem(id){
+ customEvents=customEvents.filter(e=>e.id!==id);
+ localStorage.setItem(scheduleKey,JSON.stringify(customEvents));
+ if(editingItemId===id)clearScheduleForm();
+ renderTimeline();renderSavedItems();renderMemoryEngine();renderMissionControl();
+}
+function renderSavedItems(){
+ const box=document.getElementById('savedItems');box.innerHTML='';
+ if(!customEvents.length){box.innerHTML='<div class="small">No custom items added yet.</div>';return}
+ [...customEvents].sort((a,b)=>nextOccurrence(a)-nextOccurrence(b)).forEach(e=>{
+  const t=nextOccurrence(e),meta=typeMeta[e.type];
+  const d=document.createElement('div');d.className='savedItem';
+  d.innerHTML=`<div><strong>${meta.icon} ${e.title}</strong><div class="savedMeta">${meta.label} · ${t.toLocaleDateString()} ${t.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})}${e.repeat&&e.repeat!=='none'?' · '+repeatLabels[e.repeat]:''}${e.amount?' · '+e.amount:''}<br>${e.details||''}</div></div><div class="memoryButtons"><button class="miniBtn" onclick="editScheduleItem('${e.id}')">Edit</button><button class="miniBtn danger" onclick="deleteScheduleItem('${e.id}')">Delete</button></div>`;
+  box.appendChild(d);
+ });
+}
+function scrollToScheduleManager(){
+ document.getElementById('managerPanel').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function renderMemoryEngine(){
+ const list=document.getElementById('memoryList');if(!list)return;
+ const query=(document.getElementById('memorySearch')?.value||'').toLowerCase();
+ const filter=document.getElementById('memoryTypeFilter')?.value||'all';
+ const now=new Date();
+ const items=[...customEvents].sort((a,b)=>nextOccurrence(a,now)-nextOccurrence(b,now));
+ const filtered=items.filter(e=>{
+  const hay=[e.title,e.details,e.amount,typeMeta[e.type]?.label].join(' ').toLowerCase();
+  return (filter==='all'||e.type===filter)&&hay.includes(query);
+ });
+
+ document.getElementById('memoryTotal').textContent=items.length;
+ document.getElementById('memoryFlights').textContent=items.filter(e=>e.type==='flight').length;
+ document.getElementById('memoryFinance').textContent=items.filter(e=>e.type==='bill'||e.type==='payday').length;
+ document.getElementById('memoryUpcoming').textContent=items.filter(e=>nextOccurrence(e,now)>=now).length;
+
+ list.innerHTML='';
+ if(!filtered.length){list.innerHTML='<div class="emptyState">No Mission Objects match this view.</div>';return}
+ filtered.forEach(e=>{
+  const meta=typeMeta[e.type],t=nextOccurrence(e,now);
+  const d=document.createElement('div');d.className='memoryItem';
+  d.innerHTML=`<div class="memoryIcon">${meta.icon}</div>
+   <div><div class="memoryTitle">${e.title}</div>
+   <div class="memoryMeta">${meta.label} · ${t.toLocaleDateString([], {month:'short',day:'numeric',year:'numeric'})} · ${t.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})}${e.repeat&&e.repeat!=='none'?' · '+repeatLabels[e.repeat]:''}${e.amount?' · '+e.amount:''}<br>${e.details||'No additional details'}</div></div>
+   <div class="memoryButtons"><button class="miniBtn" onclick="editScheduleItem('${e.id}')">Edit</button><button class="miniBtn" onclick="duplicateScheduleItem('${e.id}')">Duplicate</button><button class="miniBtn danger" onclick="deleteScheduleItem('${e.id}')">Delete</button></div>`;
+  list.appendChild(d);
+ });
+}
+function exportRenOS(){
+ const payload={
+  app:'Ren OS',version:'1.9',exportedAt:new Date().toISOString(),
+  schedule:customEvents,trip:currentTrip,dayState:state,dispatchSettings,intelligenceSettings,learningHistory
+ };
+ const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+ const url=URL.createObjectURL(blob);
+ const a=document.createElement('a');a.href=url;a.download='ren-os-backup-'+new Date().toISOString().slice(0,10)+'.json';
+ document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+}
+function importRenOS(event){
+ const file=event.target.files?.[0];if(!file)return;
+ const reader=new FileReader();
+ reader.onload=()=>{
+  try{
+   const data=JSON.parse(reader.result);
+   if(Array.isArray(data.schedule))customEvents=data.schedule;
+   if(data.trip)currentTrip=data.trip;
+   if(data.dispatchSettings)dispatchSettings={...dispatchSettings,...data.dispatchSettings};
+   if(data.intelligenceSettings)intelligenceSettings={...intelligenceSettings,...data.intelligenceSettings};
+   if(Array.isArray(data.learningHistory))learningHistory=data.learningHistory;
+   localStorage.setItem(scheduleKey,JSON.stringify(customEvents));
+   localStorage.setItem(tripKey,JSON.stringify(currentTrip));
+   event.target.value='';
+   renderAll();
+   alert('Ren OS backup imported successfully.');
+  }catch(err){alert('That file could not be imported as a Ren OS backup.')}
+ };
+ reader.readAsText(file);
+}
+function updateMeters(){
+ document.getElementById('waterTop').textContent=state.water+' / 128 oz';
+ document.getElementById('proteinTop').textContent=state.protein+' / 170 g';
+ document.getElementById('waterValue').textContent=state.water+' oz';
+ document.getElementById('proteinValue').textContent=state.protein+' g';
+ document.getElementById('waterBar').style.width=Math.min(100,state.water/128*100)+'%';
+ document.getElementById('proteinBar').style.width=Math.min(100,state.protein/170*100)+'%';
+ save();updateRing();renderMissionControl();
+}
+function addWater(n){state.water=Math.min(128,state.water+n);updateMeters()}
+function resetWater(){state.water=0;updateMeters()}
+function addProtein(n){state.protein=Math.min(170,state.protein+n);updateMeters()}
+function resetProtein(){state.protein=0;updateMeters()}
+function bindNavigation(){
+ document.querySelectorAll('.modeBtn').forEach(b=>{
+  b.onclick=()=>{setMode(b.dataset.mode);document.getElementById('dashboard').scrollIntoView({behavior:'smooth',block:'start'})};
+  b.onkeydown=e=>{
+    if(e.key==='ArrowDown'||e.key==='ArrowRight'){
+      e.preventDefault();const buttons=[...document.querySelectorAll('.modeBtn')];const i=buttons.indexOf(b);buttons[(i+1)%buttons.length].focus();
+    }
+    if(e.key==='ArrowUp'||e.key==='ArrowLeft'){
+      e.preventDefault();const buttons=[...document.querySelectorAll('.modeBtn')];const i=buttons.indexOf(b);buttons[(i-1+buttons.length)%buttons.length].focus();
+    }
+  };
+});
+ document.querySelectorAll('.navBtn').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('.navBtn').forEach(x=>x.classList.remove('active'));b.classList.add('active');
+  document.getElementById(b.dataset.target).scrollIntoView({behavior:'smooth',block:'start'});
+ });
+}
+function renderAll(){
+ autoSelectMode();
+ renderModeButtons();renderHome();
+ renderChecklist('flightChecklist',flightItems,'flight','flightClearance');
+ renderChecklist('turbulenceChecklist',turbulenceItems,'turbulence','turbulenceClearance');
+ renderTimeline();renderSavedItems();renderMemoryEngine();loadTripForm();loadDispatchSettings();renderTripBriefing();renderDispatchBrain();renderOperationsBrain();renderCopilot();renderNeuralCore();renderChronos();renderIntelligence();renderPredictiveDirector();renderGenesis();updateMeters();clock();renderMissionControl();
+}
+startGenesisHeaderClock();
+try{bindNavigation();renderAll();}catch(error){console.error('Genesis startup error:',error);}
+setInterval(()=>{try{clock();renderChronos();renderIntelligence();renderPredictiveDirector();renderGenesis();renderDispatchBrain();renderNeuralCore();renderCopilot();}catch(error){console.error('Genesis live-cycle error:',error);}},1000);
+</script>
+</body>
+</html>
